@@ -14,29 +14,27 @@ RUN apk update && apk add --no-cache \
 COPY config/config.inc.php /var/www/html/config.inc.php.template
 
 # Create entrypoint script to handle environment variable substitution
-RUN cat > /docker-entrypoint.sh << 'EOF'
-#!/bin/sh
-set -e
-
-# Substitute environment variables in config template
-envsubst < /var/www/html/config.inc.php.template > /var/www/html/config.inc.php
-
-# Set proper permissions
-chmod 644 /var/www/html/config.inc.php
-chown www-data:www-data /var/www/html/config.inc.php
-
-# Ensure directories exist and have proper permissions
-mkdir -p /var/www/files /var/www/html/public /var/www/html/cache
-chown -R www-data:www-data /var/www/files /var/www/html/public /var/www/html/cache
-chmod -R 755 /var/www/files /var/www/html/public /var/www/html/cache
-
-# Set Apache environment variables for HTTPS
-export HTTPS=on
-export SERVER_NAME=${SERVER_NAME:-publications.fstu.uz}
-
-# Start Apache in foreground
-exec apache2-foreground
-EOF
+RUN echo '#!/bin/sh' > /docker-entrypoint.sh && \
+    echo 'set -e' >> /docker-entrypoint.sh && \
+    echo '' >> /docker-entrypoint.sh && \
+    echo '# Substitute environment variables in config template' >> /docker-entrypoint.sh && \
+    echo 'envsubst < /var/www/html/config.inc.php.template > /var/www/html/config.inc.php' >> /docker-entrypoint.sh && \
+    echo '' >> /docker-entrypoint.sh && \
+    echo '# Set proper permissions' >> /docker-entrypoint.sh && \
+    echo 'chmod 644 /var/www/html/config.inc.php' >> /docker-entrypoint.sh && \
+    echo 'chown www-data:www-data /var/www/html/config.inc.php' >> /docker-entrypoint.sh && \
+    echo '' >> /docker-entrypoint.sh && \
+    echo '# Ensure directories exist and have proper permissions' >> /docker-entrypoint.sh && \
+    echo 'mkdir -p /var/www/files /var/www/html/public /var/www/html/cache' >> /docker-entrypoint.sh && \
+    echo 'chown -R www-data:www-data /var/www/files /var/www/html/public /var/www/html/cache' >> /docker-entrypoint.sh && \
+    echo 'chmod -R 755 /var/www/files /var/www/html/public /var/www/html/cache' >> /docker-entrypoint.sh && \
+    echo '' >> /docker-entrypoint.sh && \
+    echo '# Set Apache environment variables for HTTPS' >> /docker-entrypoint.sh && \
+    echo 'export HTTPS=on' >> /docker-entrypoint.sh && \
+    echo 'export SERVER_NAME=${SERVER_NAME:-publications.fstu.uz}' >> /docker-entrypoint.sh && \
+    echo '' >> /docker-entrypoint.sh && \
+    echo '# Start Apache in foreground' >> /docker-entrypoint.sh && \
+    echo 'exec apache2-foreground' >> /docker-entrypoint.sh
 
 RUN chmod +x /docker-entrypoint.sh
 
