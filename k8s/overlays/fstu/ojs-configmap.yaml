@@ -9,9 +9,14 @@ metadata:
 data:
   OJS_DB_HOST: "ojs-mysql-service-fstu"
   OJS_DB_NAME: "ojs_fstu_db"
-  BASE_URL: "http://publications.fstu.uz"
+  BASE_URL: "https://publications.fstu.uz"
   db-name: "ojs_fstu_db"
-  base-url: "http://publications.fstu.uz"
+  base-url: "https://publications.fstu.uz"
+  # SSL/Proxy configuration
+  HTTPS: "on"
+  HTTP_X_FORWARDED_PROTO: "https"
+  HTTP_X_FORWARDED_PORT: "443"
+  SERVER_PORT: "443"
 ---
 # OJS FSTU Secret
 apiVersion: v1
