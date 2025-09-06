@@ -16,25 +16,16 @@ spec:
         app: ojs-fstu
     spec:
       securityContext:
-        fsGroup: 82 # Ensure volumes are owned by www-data group (Alpine Linux UID)
-        fsGroupChangePolicy: "Always"
+        fsGroup: 33 # Ensure volumes are owned by www-data group
       initContainers:
         - name: fix-permissions
           image: busybox:1.35
           command: ["sh", "-c"]
           args:
             - |
-              echo "Setting up directories and permissions..."
-              mkdir -p /var/www/files /var/www/html/public /var/www/html/cache /var/www/logs /var/www/html/config
-              chown -R 82:82 /var/www/files /var/www/html/public /var/www/html/cache /var/www/logs
+              chown -R 33:33 /var/www/files /var/www/html/public /var/www/html/cache /var/www/logs
               chmod -R 755 /var/www/files /var/www/html/public /var/www/html/cache /var/www/logs
-              # Create config.inc.php if it doesn't exist and set permissions
-              if [ ! -f /var/www/html/config.inc.php ]; then
-                touch /var/www/html/config.inc.php
-              fi
-              chown 82:82 /var/www/html/config.inc.php
-              chmod 666 /var/www/html/config.inc.php
-              echo "Permissions setup completed"
+              chmod -R 666 /var/www/html/config.inc.php 2>/dev/null || echo "config.inc.php not found, will be created"
           volumeMounts:
             - name: ojs-files
               mountPath: /var/www/files
@@ -44,11 +35,8 @@ spec:
               mountPath: /var/www/html/cache
             - name: ojs-logs
               mountPath: /var/www/logs
-            - name: ojs-config
-              mountPath: /var/www/html/config
           securityContext:
             runAsUser: 0 # Run as root to fix permissions
-            runAsGroup: 0
       containers:
         - name: ojs
           image: ojs-fstu:latest
@@ -69,18 +57,9 @@ spec:
               mountPath: /var/www/html/cache
             - name: ojs-logs
               mountPath: /var/www/logs
-            - name: ojs-config
-              mountPath: /var/www/html/config
           securityContext:
-            runAsUser: 0 # Run as root initially - OJS base image handles user switching
+            runAsUser: 0 # Run as root initially for setup
             allowPrivilegeEscalation: true
-            capabilities:
-              add:
-                - CHOWN
-                - DAC_OVERRIDE
-                - SETGID
-                - SETUID
-                - SYS_ADMIN
           resources:
             requests:
               memory: "512Mi"
@@ -88,22 +67,6 @@ spec:
             limits:
               memory: "1Gi"
               cpu: "500m"
-          readinessProbe:
-            httpGet:
-              path: /index.php
-              port: 80
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
-          livenessProbe:
-            httpGet:
-              path: /index.php
-              port: 80
-            initialDelaySeconds: 60
-            periodSeconds: 30
-            timeoutSeconds: 10
-            failureThreshold: 3
       volumes:
         - name: ojs-files
           persistentVolumeClaim:
@@ -114,8 +77,6 @@ spec:
         - name: ojs-cache
           emptyDir: {}
         - name: ojs-logs
-          emptyDir: {}
-        - name: ojs-config
           emptyDir: {}
 ---
 apiVersion: v1
