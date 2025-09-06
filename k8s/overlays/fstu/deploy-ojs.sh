@@ -26,6 +26,7 @@ kubectl apply -f ojs-pvc.yaml
 kubectl apply -f ojs-configmap.yaml
 kubectl apply -f ojs-mysql-deployment.yaml
 kubectl apply -f ojs-deployment.yaml
+kubectl apply -f ojs-ingress.yaml
 
 
 
