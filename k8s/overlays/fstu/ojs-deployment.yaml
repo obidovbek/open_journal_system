@@ -16,7 +16,7 @@ spec:
         app: ojs-fstu
     spec:
       securityContext:
-        fsGroup: 33 # Ensure volumes are owned by www-data group
+        fsGroup: 82 # Ensure volumes are owned by www-data group (Alpine Linux UID)
         fsGroupChangePolicy: "Always"
       initContainers:
         - name: fix-permissions
@@ -26,13 +26,13 @@ spec:
             - |
               echo "Setting up directories and permissions..."
               mkdir -p /var/www/files /var/www/html/public /var/www/html/cache /var/www/logs /var/www/html/config
-              chown -R 33:33 /var/www/files /var/www/html/public /var/www/html/cache /var/www/logs
+              chown -R 82:82 /var/www/files /var/www/html/public /var/www/html/cache /var/www/logs
               chmod -R 755 /var/www/files /var/www/html/public /var/www/html/cache /var/www/logs
               # Create config.inc.php if it doesn't exist and set permissions
               if [ ! -f /var/www/html/config.inc.php ]; then
                 touch /var/www/html/config.inc.php
               fi
-              chown 33:33 /var/www/html/config.inc.php
+              chown 82:82 /var/www/html/config.inc.php
               chmod 666 /var/www/html/config.inc.php
               echo "Permissions setup completed"
           volumeMounts:
@@ -72,8 +72,8 @@ spec:
             - name: ojs-config
               mountPath: /var/www/html/config
           securityContext:
-            runAsUser: 33 # Run as www-data user
-            runAsGroup: 33 # Run as www-data group
+            runAsUser: 82 # Run as www-data user (Alpine Linux UID)
+            runAsGroup: 82 # Run as www-data group (Alpine Linux GID)
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
             capabilities:

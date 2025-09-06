@@ -29,9 +29,10 @@ RUN if [ ! -f /etc/ssl/apache2/server.pem ]; then \
 COPY config/ /var/www/html/config/
 
 # Set proper ownership and permissions for all directories
-RUN chown -R www-data:www-data /var/www/html \
-    && chown -R www-data:www-data /var/www/files \
-    && chown -R www-data:www-data /var/www/logs \
+# In Alpine Linux, www-data has UID 82, not 33 like in Debian/Ubuntu
+RUN chown -R 82:82 /var/www/html \
+    && chown -R 82:82 /var/www/files \
+    && chown -R 82:82 /var/www/logs \
     && chmod -R 755 /var/www/html \
     && chmod -R 755 /var/www/files \
     && chmod -R 755 /var/www/logs \
