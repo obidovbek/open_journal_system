@@ -72,18 +72,15 @@ spec:
             - name: ojs-config
               mountPath: /var/www/html/config
           securityContext:
-            runAsUser: 82 # Run as www-data user (Alpine Linux UID)
-            runAsGroup: 82 # Run as www-data group (Alpine Linux GID)
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
+            runAsUser: 0 # Run as root initially - OJS base image handles user switching
+            allowPrivilegeEscalation: true
             capabilities:
-              drop:
-                - ALL
               add:
                 - CHOWN
                 - DAC_OVERRIDE
                 - SETGID
                 - SETUID
+                - SYS_ADMIN
           resources:
             requests:
               memory: "512Mi"

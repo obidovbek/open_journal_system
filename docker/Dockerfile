@@ -10,37 +10,32 @@ RUN apk update && apk add --no-cache \
     unzip \
     openssl
 
-# Create necessary directories and set permissions
+# Create necessary directories
 RUN mkdir -p /var/www/logs \
     && mkdir -p /etc/ssl/apache2 \
     && mkdir -p /var/www/html/cache \
     && mkdir -p /var/www/html/public \
     && mkdir -p /var/www/files
 
-# Generate self-signed SSL certificate if it doesn't exist
-RUN if [ ! -f /etc/ssl/apache2/server.pem ]; then \
-        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-        -keyout /etc/ssl/apache2/server.key \
-        -out /etc/ssl/apache2/server.pem \
-        -subj "/C=UZ/ST=Tashkent/L=Tashkent/O=FSTU/CN=publications.fstu.uz"; \
-    fi
+# Generate self-signed SSL certificate with proper permissions
+RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout /etc/ssl/apache2/server.key \
+    -out /etc/ssl/apache2/server.pem \
+    -subj "/C=UZ/ST=Tashkent/L=Tashkent/O=FSTU/CN=publications.fstu.uz" \
+    && chmod 644 /etc/ssl/apache2/server.pem \
+    && chmod 644 /etc/ssl/apache2/server.key \
+    && chown -R root:root /etc/ssl/apache2
 
-# Copy custom configuration if needed
+# Copy custom configuration
 COPY config/ /var/www/html/config/
 
-# Set proper ownership and permissions for all directories
-# In Alpine Linux, www-data has UID 82, not 33 like in Debian/Ubuntu
-RUN chown -R 82:82 /var/www/html \
-    && chown -R 82:82 /var/www/files \
-    && chown -R 82:82 /var/www/logs \
-    && chmod -R 755 /var/www/html \
-    && chmod -R 755 /var/www/files \
-    && chmod -R 755 /var/www/logs \
-    && chmod 644 /var/www/html/config/* \
-    && chmod 666 /var/www/html/config.inc.php
+# Set proper ownership and permissions for directories that will be mounted
+# Use numeric IDs to avoid issues with user name resolution
+RUN chown -R 82:82 /var/www/html/config \
+    && chmod -R 644 /var/www/html/config/* \
+    && chmod 666 /var/www/html/config.inc.php 2>/dev/null || echo "config.inc.php will be created at runtime"
 
 # Expose port
 EXPOSE 80
 
-# Use the same CMD as the base image (don't override it)
-# The base image already has the correct startup command 
+# Use the base image's default startup command 
