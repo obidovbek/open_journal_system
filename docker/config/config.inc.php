@@ -13,10 +13,10 @@
 
 ; Database connection settings
 driver = mysqli
-host = ${OJS_DB_HOST}
-username = ${OJS_DB_USER}
-password = ${OJS_DB_PASSWORD}
-name = ${OJS_DB_NAME}
+host = ojs-mysql-service-fstu
+username = ojs_fstu_user
+password = secure_ojs_fstu_password
+name = ojs_fstu_db
 
 ; Base URL and path settings
 base_url = "https://publications.fstu.uz"
@@ -129,10 +129,10 @@ frame_options_deny = On
 [database]
 
 driver = mysqli
-host = ${OJS_DB_HOST}
-username = ${OJS_DB_USER}
-password = ${OJS_DB_PASSWORD}
-name = ${OJS_DB_NAME}
+host = ojs-mysql-service-fstu
+username = ojs_fstu_user
+password = secure_ojs_fstu_password
+name = ojs_fstu_db
 charset = utf8
 collation = utf8_general_ci
 
