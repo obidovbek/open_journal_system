@@ -30,11 +30,22 @@ kubectl apply -f ojs-ingress.yaml
 
 
 
+# Wait for deployments to be ready
+echo "Waiting for deployments to be ready..."
+kubectl wait --for=condition=available --timeout=300s deployment/ojs-mysql-deployment-fstu -n ojs-fstu
+kubectl wait --for=condition=available --timeout=300s deployment/ojs-deployment-fstu -n ojs-fstu
+
 echo "OJS deployment completed!"
 echo "OJS will be available at: https://publications.fstu.uz"
+echo ""
+echo "To check status:"
+echo "kubectl get pods -n ojs-fstu"
 echo ""
 echo "To check logs:"
 echo "kubectl logs -f deployment/ojs-deployment-fstu -n ojs-fstu"
 echo "kubectl logs -f deployment/ojs-mysql-deployment-fstu -n ojs-fstu"
 echo ""
-echo "Note: You need to update the main FSTU ingress to include publications.fstu.uz routing" 
+echo "To restart OJS deployment (if needed):"
+echo "kubectl rollout restart deployment/ojs-deployment-fstu -n ojs-fstu"
+echo ""
+echo "Note: SSL certificate will be automatically issued by cert-manager" 

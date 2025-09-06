@@ -26,6 +26,15 @@ spec:
                 name: ojs-fstu-config
             - secretRef:
                 name: ojs-fstu-secret
+          env:
+            - name: OJS_FORCE_SSL
+              value: "1"
+            - name: HTTPS
+              value: "on"
+            - name: SERVER_NAME
+              value: "publications.fstu.uz"
+            - name: OJS_CLI_INSTALL
+              value: "0"
           volumeMounts:
             - name: ojs-files
               mountPath: /var/www/files
