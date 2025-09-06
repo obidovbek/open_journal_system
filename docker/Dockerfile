@@ -3,7 +3,7 @@ FROM pkpofficial/ojs:3_4_0-5
 # Set working directory
 WORKDIR /var/www/html
 
-# Install additional packages if needed (Alpine Linux uses apk)
+# Install additional packages if needed (Alpine Linux uses apk) fi
 RUN apk update && apk add --no-cache \
     curl \
     zip \
