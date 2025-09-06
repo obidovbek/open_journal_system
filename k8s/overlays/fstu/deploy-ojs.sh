@@ -22,12 +22,6 @@ k3s ctr images import ojs-fstu.tar
 # Apply OJS configurations
 echo "Applying OJS configurations..."
 cd "$PROJECT_ROOT/k8s/overlays/fstu"
-
-# Apply SSL/HTTPS configurations first
-kubectl apply -f cluster-issuer.yaml
-kubectl apply -f https-redirect-middleware.yaml
-
-# Apply OJS configurations
 kubectl apply -f ojs-pvc.yaml
 kubectl apply -f ojs-configmap.yaml
 kubectl apply -f ojs-mysql-deployment.yaml

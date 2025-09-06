@@ -1,30 +1,31 @@
-# OJS FSTU Deployment Guide
+# OJS FSTU Deployment Guide - Simplified Approach
 
 ## Problem Solved
 
-This configuration fixes the mixed content errors and loading issues you were experiencing with OJS behind your nginx proxy server. The main issues were:
+This configuration fixes the mixed content errors and console errors you were experiencing with OJS behind your nginx proxy server, while avoiding the 404 errors from complex SSL termination.
+
+### Root Cause
 
 1. **Mixed Content Errors**: OJS was configured with HTTP base URL but served over HTTPS
-2. **Missing SSL Configuration**: Ingress wasn't properly configured for HTTPS
-3. **Proxy Headers**: OJS wasn't aware it was behind an HTTPS proxy
+2. **HTTPS Detection**: OJS wasn't aware it was behind an HTTPS proxy
+3. **Over-complicated SSL**: Previous attempt with ingress SSL termination caused 404 errors
+
+### Simple Solution
+
+- Keep SSL termination at your nginx proxy (as you already have)
+- Use simple HTTP routing in Kubernetes ingress
+- Configure OJS to be HTTPS-aware through environment variables
 
 ## Prerequisites
 
-Before deploying, ensure you have:
+You only need:
 
-1. **cert-manager** installed in your cluster:
-
-   ```bash
-   kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.0/cert-manager.yaml
-   ```
-
-2. **Traefik** configured with both `web` (80) and `websecure` (443) entrypoints
-
-3. Your nginx proxy server configured as shown (with the X-Forwarded-Proto and X-Forwarded-Port headers)
+1. **Traefik** configured with `web` (80) entrypoint
+2. Your nginx proxy server configured with the forwarded headers (which you already have)
 
 ## Deployment Steps
 
-1. **Deploy the configuration**:
+1. **Deploy the simplified configuration**:
 
    ```bash
    cd /d/projects/open_journal_system/k8s/overlays/fstu
@@ -41,127 +42,110 @@ Before deploying, ensure you have:
    # Check ingress
    kubectl get ingress -n ojs-fstu
 
-   # Check certificate
-   kubectl get certificate -n ojs-fstu
-   ```
-
-3. **Monitor certificate issuance**:
-   ```bash
-   kubectl describe certificate publications-fstu-tls -n ojs-fstu
+   # Test internal connectivity
+   kubectl port-forward svc/ojs-service-fstu 8080:80 -n ojs-fstu
+   # Then test: curl http://localhost:8080
    ```
 
 ## Key Changes Made
 
 ### 1. ConfigMap Updates (`ojs-configmap.yaml`)
 
-- Changed `BASE_URL` from HTTP to HTTPS
-- Added SSL-aware environment variables:
-  - `HTTPS: "on"`
-  - `HTTP_X_FORWARDED_PROTO: "https"`
-  - `HTTP_X_FORWARDED_PORT: "443"`
-  - `SERVER_PORT: "443"`
+- Changed `BASE_URL` from HTTP to HTTPS: `https://publications.fstu.uz`
+- Added minimal SSL-aware environment variables:
+  - `HTTPS: "on"` - Tells OJS it's running under HTTPS
+  - `SERVER_PORT: "443"` - Makes OJS think it's on port 443
 
-### 2. Ingress Configuration (`ojs-ingress.yaml`)
+### 2. Simplified Ingress (`ojs-ingress.yaml`)
 
-- Added `websecure` entrypoint for HTTPS
-- Configured TLS termination
-- Added cert-manager annotations for automatic SSL certificate
-- Added HTTPS redirect middleware
+- **Removed** complex SSL termination, cert-manager, and HTTPS redirects
+- Uses simple HTTP routing: `traefik.ingress.kubernetes.io/router.entrypoints: web`
+- Routes `publications.fstu.uz` traffic to OJS service on port 80
 
-### 3. New Files Created
+### 3. Your Nginx Proxy (Already Correct)
 
-- `cluster-issuer.yaml`: Let's Encrypt certificate issuer
-- `https-redirect-middleware.yaml`: HTTP to HTTPS redirect
-- `README.md`: This documentation
+Your existing nginx configuration is perfect for this setup:
+
+```nginx
+location / {
+    proxy_set_header         X-Forwarded-Proto   https;  # ✅
+    proxy_set_header         X-Forwarded-Port    443;    # ✅
+    proxy_pass http://192.168.10.119;  # Routes to your k8s cluster
+}
+```
+
+## Traffic Flow
+
+```
+Browser (HTTPS) → Nginx Proxy (SSL termination) → Kubernetes Ingress (HTTP) → OJS Pod (HTTP)
+     ↑                    ↑                              ↑                    ↑
+   Port 443          Handles SSL                   Routes by host        Thinks it's HTTPS
+```
 
 ## Troubleshooting
 
 ### If you still see mixed content errors:
 
-1. **Clear browser cache** completely
-2. **Check OJS configuration** in the admin panel:
-   - Go to Administration > Site Settings
-   - Verify the Base URL is set to `https://publications.fstu.uz`
-3. **Restart the OJS pods**:
+1. **Clear browser cache** completely and restart browser
+2. **Restart OJS pods**:
    ```bash
    kubectl rollout restart deployment/ojs-deployment-fstu -n ojs-fstu
    ```
-
-### If certificate isn't issued:
-
-1. **Check cert-manager logs**:
-
+3. **Check environment variables**:
    ```bash
-   kubectl logs -n cert-manager deployment/cert-manager
+   kubectl exec -it deployment/ojs-deployment-fstu -n ojs-fstu -- env | grep -E "(HTTPS|BASE_URL|SERVER_PORT)"
    ```
 
-2. **Check certificate request**:
+### If you get 404 errors:
+
+1. **Check ingress status**:
 
    ```bash
-   kubectl describe certificaterequest -n ojs-fstu
+   kubectl get ingress -n ojs-fstu -o wide
+   kubectl describe ingress ojs-fstu-ingress -n ojs-fstu
    ```
 
-3. **Verify DNS**: Ensure `publications.fstu.uz` resolves to your server
-
-### If OJS still loads over HTTP:
-
-1. **Check environment variables**:
+2. **Verify service and endpoints**:
 
    ```bash
-   kubectl exec -it deployment/ojs-deployment-fstu -n ojs-fstu -- env | grep -E "(HTTPS|BASE_URL|FORWARDED)"
+   kubectl get svc -n ojs-fstu
+   kubectl get endpoints -n ojs-fstu
    ```
 
-2. **Check OJS config.inc.php**:
+3. **Test service directly**:
    ```bash
-   kubectl exec -it deployment/ojs-deployment-fstu -n ojs-fstu -- cat /var/www/html/config.inc.php | grep base_url
+   kubectl port-forward svc/ojs-service-fstu 8080:80 -n ojs-fstu
+   curl -H "Host: publications.fstu.uz" http://localhost:8080
    ```
 
-## Your Nginx Proxy Configuration
+### If OJS admin shows wrong base URL:
 
-Your current nginx configuration is correct for this setup:
+1. **Check OJS configuration in admin panel**:
 
-```nginx
-location / {
-    proxy_redirect           off;
-    proxy_set_header         X-Real-IP           $remote_addr;
-    proxy_set_header         X-Forwarded-For     $proxy_add_x_forwarded_for;
-    proxy_set_header         Host                $http_host;
-    proxy_set_header         X-Forwarded-Proto   https;  # ✅ This is crucial
-    proxy_set_header         X-Forwarded-Port    443;    # ✅ This is crucial
-    proxy_read_timeout 300;
-    proxy_connect_timeout 300;
-    proxy_send_timeout 300;
-    proxy_pass http://192.168.10.119;  # Your k8s cluster
-}
-```
+   - Go to Administration > Site Settings
+   - Verify Base URL is `https://publications.fstu.uz`
 
-## Expected Result
+2. **Force update via database** (if needed):
+   ```bash
+   kubectl exec -it deployment/ojs-mysql-deployment-fstu -n ojs-fstu -- mysql -u root -p
+   # Then: UPDATE site_settings SET setting_value='https://publications.fstu.uz' WHERE setting_name='base_url';
+   ```
+
+## Expected Results
 
 After deployment:
 
+- ✅ No 404 errors (simple ingress routing works)
 - ✅ OJS loads over HTTPS without mixed content errors
 - ✅ All assets (CSS, JS, images) load over HTTPS
-- ✅ HTTP requests automatically redirect to HTTPS
-- ✅ Valid SSL certificate from Let's Encrypt
 - ✅ No more `$` or `pkp` undefined errors in console
+- ✅ Uses your existing SSL certificate from nginx
 
-## Support
+## Why This Approach Works
 
-If you encounter any issues:
+1. **Separation of Concerns**: Nginx handles SSL, Kubernetes handles routing
+2. **Minimal Configuration**: Less complexity = fewer failure points
+3. **Proven Pattern**: Many production setups use this nginx + k8s pattern
+4. **No Certificate Issues**: Uses your existing SSL setup
 
-1. Check the logs:
-
-   ```bash
-   kubectl logs -f deployment/ojs-deployment-fstu -n ojs-fstu
-   ```
-
-2. Verify ingress is working:
-
-   ```bash
-   curl -I https://publications.fstu.uz
-   ```
-
-3. Test internal connectivity:
-   ```bash
-   kubectl run test-pod --image=curlimages/curl -i --rm --restart=Never -- curl -I http://ojs-service-fstu.ojs-fstu.svc.cluster.local
-   ```
+The key insight is that OJS just needs to _think_ it's running under HTTPS, even though the internal k8s traffic is HTTP.
