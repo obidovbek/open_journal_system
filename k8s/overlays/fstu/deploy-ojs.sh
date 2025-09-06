@@ -27,20 +27,7 @@ kubectl apply -f ojs-configmap.yaml
 kubectl apply -f ojs-mysql-deployment.yaml
 kubectl apply -f ojs-deployment.yaml
 
-# Wait for deployments to be ready
-echo "Waiting for OJS deployments to be ready..."
-kubectl wait --for=condition=available --timeout=600s deployment/ojs-mysql-deployment-fstu -n ojs-fstu
-kubectl wait --for=condition=available --timeout=600s deployment/ojs-deployment-fstu -n ojs-fstu
 
-# Get service information
-echo "Getting OJS service information..."
-kubectl get services -l app=ojs-fstu -n ojs-fstu
-kubectl get services -l app=ojs-mysql-fstu -n ojs-fstu
-
-# Get pod status
-echo "Getting OJS pod status..."
-kubectl get pods -l app=ojs-fstu -n ojs-fstu
-kubectl get pods -l app=ojs-mysql-fstu -n ojs-fstu
 
 echo "OJS deployment completed!"
 echo "OJS will be available at: https://publications.fstu.uz"
