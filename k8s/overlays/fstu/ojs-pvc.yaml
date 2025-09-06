@@ -3,7 +3,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: ojs-files-fstu-pvc
-  namespace: fstu
+  namespace: ojs-fstu
   labels:
     app: ojs-fstu
 spec:
@@ -18,7 +18,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: ojs-public-fstu-pvc
-  namespace: fstu
+  namespace: ojs-fstu
   labels:
     app: ojs-fstu
 spec:
@@ -33,7 +33,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: ojs-mysql-fstu-pvc
-  namespace: fstu
+  namespace: ojs-fstu
   labels:
     app: ojs-mysql-fstu
 spec:

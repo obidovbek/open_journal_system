@@ -4,7 +4,7 @@
 echo "Deploying OJS to FSTU Environment..."
 
 # Create namespace if it doesn't exist
-kubectl create namespace fstu --dry-run=client -o yaml | kubectl apply -f -
+kubectl create namespace ojs-fstu --dry-run=client -o yaml | kubectl apply -f -
 
 # Build OJS image for FSTU
 echo "Building OJS image for FSTU..."
@@ -29,24 +29,24 @@ kubectl apply -f ojs-deployment.yaml
 
 # Wait for deployments to be ready
 echo "Waiting for OJS deployments to be ready..."
-kubectl wait --for=condition=available --timeout=600s deployment/ojs-mysql-deployment-fstu -n fstu
-kubectl wait --for=condition=available --timeout=600s deployment/ojs-deployment-fstu -n fstu
+kubectl wait --for=condition=available --timeout=600s deployment/ojs-mysql-deployment-fstu -n ojs-fstu
+kubectl wait --for=condition=available --timeout=600s deployment/ojs-deployment-fstu -n ojs-fstu
 
 # Get service information
 echo "Getting OJS service information..."
-kubectl get services -l app=ojs-fstu -n fstu
-kubectl get services -l app=ojs-mysql-fstu -n fstu
+kubectl get services -l app=ojs-fstu -n ojs-fstu
+kubectl get services -l app=ojs-mysql-fstu -n ojs-fstu
 
 # Get pod status
 echo "Getting OJS pod status..."
-kubectl get pods -l app=ojs-fstu -n fstu
-kubectl get pods -l app=ojs-mysql-fstu -n fstu
+kubectl get pods -l app=ojs-fstu -n ojs-fstu
+kubectl get pods -l app=ojs-mysql-fstu -n ojs-fstu
 
 echo "OJS deployment completed!"
 echo "OJS will be available at: https://publications.fstu.uz"
 echo ""
 echo "To check logs:"
-echo "kubectl logs -f deployment/ojs-deployment-fstu -n fstu"
-echo "kubectl logs -f deployment/ojs-mysql-deployment-fstu -n fstu"
+echo "kubectl logs -f deployment/ojs-deployment-fstu -n ojs-fstu"
+echo "kubectl logs -f deployment/ojs-mysql-deployment-fstu -n ojs-fstu"
 echo ""
 echo "Note: You need to update the main FSTU ingress to include publications.fstu.uz routing" 
