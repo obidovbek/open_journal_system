@@ -1,0 +1,23 @@
+# OJS (Open Journal System) Environment Configuration
+# Copy this file to .env and update with your actual values
+
+# OJS Database Configuration
+OJS_DB_NAME=ojs_db
+OJS_DB_USER=ojs_user
+OJS_DB_PASSWORD=secure_ojs_password
+OJS_MYSQL_ROOT_PASSWORD=secure_mysql_root_password
+
+# OJS Application Configuration
+OJS_BASE_URL=https://publications.fstu.uz
+
+# Security Settings (Generate new values for production)
+OJS_SALT=OJSSaltChangeThisInProduction
+
+# Email Configuration
+OJS_DEFAULT_ENVELOPE_SENDER=noreply@fstu.uz
+OJS_SMTP_SERVER=localhost
+OJS_SMTP_PORT=25
+
+# Debug Settings
+OJS_DEBUG=false
+OJS_SHOW_STACKTRACE=false 

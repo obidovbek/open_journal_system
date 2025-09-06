@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ojs-deployment-demo
+  labels:
+    app: ojs-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ojs-demo
+  template:
+    metadata:
+      labels:
+        app: ojs-demo
+    spec:
+      containers:
+        - name: ojs
+          image: ojs-demo:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: ojs-demo-config
+            - secretRef:
+                name: ojs-demo-secret
+          volumeMounts:
+            - name: ojs-files
+              mountPath: /var/www/files
+            - name: ojs-public
+              mountPath: /var/www/html/public
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+      volumes:
+        - name: ojs-files
+          persistentVolumeClaim:
+            claimName: ojs-files-demo-pvc
+        - name: ojs-public
+          persistentVolumeClaim:
+            claimName: ojs-public-demo-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ojs-demo-service
+  labels:
+    app: ojs-demo
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app: ojs-demo

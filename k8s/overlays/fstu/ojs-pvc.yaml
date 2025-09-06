@@ -1,0 +1,45 @@
+# OJS FSTU Persistent Volume Claims
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ojs-files-fstu-pvc
+  namespace: fstu
+  labels:
+    app: ojs-fstu
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ojs-public-fstu-pvc
+  namespace: fstu
+  labels:
+    app: ojs-fstu
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ojs-mysql-fstu-pvc
+  namespace: fstu
+  labels:
+    app: ojs-mysql-fstu
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: standard

@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ojs-deployment-fstu
+  namespace: fstu
+  labels:
+    app: ojs-fstu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ojs-fstu
+  template:
+    metadata:
+      labels:
+        app: ojs-fstu
+    spec:
+      containers:
+        - name: ojs
+          image: ojs-fstu:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: ojs-fstu-config
+            - secretRef:
+                name: ojs-fstu-secret
+          volumeMounts:
+            - name: ojs-files
+              mountPath: /var/www/files
+            - name: ojs-public
+              mountPath: /var/www/html/public
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+      volumes:
+        - name: ojs-files
+          persistentVolumeClaim:
+            claimName: ojs-files-fstu-pvc
+        - name: ojs-public
+          persistentVolumeClaim:
+            claimName: ojs-public-fstu-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ojs-service-fstu
+  namespace: fstu
+  labels:
+    app: ojs-fstu
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app: ojs-fstu

@@ -1,0 +1,11 @@
+# OJS Demo ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ojs-demo-config
+  labels:
+    app: ojs-demo
+data:
+  OJS_DB_HOST: "ojs-mysql-demo-service"
+  OJS_DB_NAME: "ojs_demo_db"
+  BASE_URL: "http://ojs-demo.example.com"

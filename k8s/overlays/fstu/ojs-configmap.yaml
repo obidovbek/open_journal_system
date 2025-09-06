@@ -1,0 +1,34 @@
+# OJS FSTU ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ojs-fstu-config
+  namespace: fstu
+  labels:
+    app: ojs-fstu
+data:
+  OJS_DB_HOST: "ojs-mysql-service-fstu"
+  OJS_DB_NAME: "ojs_fstu_db"
+  BASE_URL: "https://publications.fstu.uz"
+  db-name: "ojs_fstu_db"
+  base-url: "https://publications.fstu.uz"
+---
+# OJS FSTU Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ojs-fstu-secret
+  namespace: fstu
+  labels:
+    app: ojs-fstu
+type: Opaque
+data:
+  # Base64 encoded values - replace with actual production values
+  # echo -n 'ojs_fstu_user' | base64
+  db-user: b2pzX2ZzdHVfdXNlcg==
+  # echo -n 'secure_ojs_fstu_password' | base64
+  db-password: c2VjdXJlX29qc19mc3R1X3Bhc3N3b3Jk
+  # echo -n 'secure_mysql_root_password' | base64
+  mysql-root-password: c2VjdXJlX215c3FsX3Jvb3RfcGFzc3dvcmQ=
+  OJS_DB_USER: b2pzX2ZzdHVfdXNlcg==
+  OJS_DB_PASSWORD: c2VjdXJlX29qc19mc3R1X3Bhc3N3b3Jk

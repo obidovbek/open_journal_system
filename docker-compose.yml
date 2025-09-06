@@ -1,0 +1,49 @@
+# OJS Docker Compose Configuration
+
+networks:
+  ojs_network:
+    driver: bridge
+
+services:
+  # OJS (Open Journal System) Service
+  ojs:
+    env_file:
+      - .env
+    build:
+      context: ./docker
+      dockerfile: Dockerfile
+    container_name: ojs
+    depends_on:
+      - ojs-mysql
+    ports:
+      - "8081:80"
+    environment:
+      - OJS_DB_HOST=ojs-mysql
+      - OJS_DB_USER=${OJS_DB_USER:-ojs_user}
+      - OJS_DB_PASSWORD=${OJS_DB_PASSWORD:-ojs_password}
+      - OJS_DB_NAME=${OJS_DB_NAME:-ojs_db}
+      - BASE_URL=${OJS_BASE_URL:-http://localhost:8081}
+    volumes:
+      - ./data/ojs_files:/var/www/files
+      - ./data/ojs_public:/var/www/html/public
+    networks:
+      - ojs_network
+    restart: unless-stopped
+
+  ojs-mysql:
+    env_file:
+      - .env
+    image: mysql:8.0
+    container_name: ojs-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${OJS_MYSQL_ROOT_PASSWORD:-root_password}
+      MYSQL_DATABASE: ${OJS_DB_NAME:-ojs_db}
+      MYSQL_USER: ${OJS_DB_USER:-ojs_user}
+      MYSQL_PASSWORD: ${OJS_DB_PASSWORD:-ojs_password}
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    networks:
+      - ojs_network
+    restart: unless-stopped

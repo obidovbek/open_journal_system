@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ojs-deployment
+  labels:
+    app: ojs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ojs
+  template:
+    metadata:
+      labels:
+        app: ojs
+    spec:
+      containers:
+        - name: ojs
+          image: ojs:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          env:
+            - name: OJS_DB_HOST
+              value: "ojs-mysql-service"
+            - name: OJS_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: ojs-secret
+                  key: db-user
+            - name: OJS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ojs-secret
+                  key: db-password
+            - name: OJS_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: ojs-config
+                  key: db-name
+          volumeMounts:
+            - name: ojs-files
+              mountPath: /var/www/files
+            - name: ojs-public
+              mountPath: /var/www/html/public
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+      volumes:
+        - name: ojs-files
+          persistentVolumeClaim:
+            claimName: ojs-files-pvc
+        - name: ojs-public
+          persistentVolumeClaim:
+            claimName: ojs-public-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ojs-service
+  labels:
+    app: ojs
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app: ojs

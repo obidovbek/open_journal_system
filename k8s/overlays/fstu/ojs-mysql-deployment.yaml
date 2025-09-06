@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ojs-mysql-deployment-fstu
+  namespace: fstu
+  labels:
+    app: ojs-mysql-fstu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ojs-mysql-fstu
+  template:
+    metadata:
+      labels:
+        app: ojs-mysql-fstu
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+          envFrom:
+            - configMapRef:
+                name: ojs-fstu-config
+            - secretRef:
+                name: ojs-fstu-secret
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ojs-fstu-secret
+                  key: mysql-root-password
+            - name: MYSQL_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: ojs-fstu-config
+                  key: db-name
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: ojs-fstu-secret
+                  key: db-user
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ojs-fstu-secret
+                  key: db-password
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: ojs-mysql-fstu-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ojs-mysql-service-fstu
+  namespace: fstu
+  labels:
+    app: ojs-mysql-fstu
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3306
+      targetPort: 3306
+      protocol: TCP
+  selector:
+    app: ojs-mysql-fstu
