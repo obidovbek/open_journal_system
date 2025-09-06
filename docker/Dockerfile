@@ -18,8 +18,8 @@ RUN chmod -R 644 /var/www/html/config/
 
 # Ensure cache directories exist and are writable by the web server user
 # Alpine base image may not include a www-data user. Create it so chown works.
-RUN addgroup -g 82 -S www-data \
-    && adduser -u 82 -S -G www-data www-data
+RUN getent group www-data || addgroup -g 82 -S www-data \
+    && getent passwd www-data || adduser -u 82 -S -G www-data www-data
 
 # Now adjust ownership/permissions
 RUN mkdir -p /var/www/html/cache/opcache \
