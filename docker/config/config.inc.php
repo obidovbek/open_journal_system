@@ -165,16 +165,19 @@ memcache_port = 11211
 [email]
 
 ; Default envelope sender
-default_envelope_sender = ""
-allow_envelope_sender = Off
+default_envelope_sender = "noreply@publications.fstu.uz"
+allow_envelope_sender = On
 
-; SMTP settings
+; SMTP settings (using sendmail for simplicity)
 smtp = Off
 smtp_server = localhost
 smtp_port = 25
 smtp_auth = Off
 smtp_username = ""
 smtp_password = ""
+
+; Mailer driver (required for OJS 3.4+)
+default_mailer = "sendmail"
 
 ;;;;;;;;;;;;;;;;;;
 ; Logging        ;
