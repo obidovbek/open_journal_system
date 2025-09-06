@@ -8,7 +8,11 @@ kubectl create namespace fstu --dry-run=client -o yaml | kubectl apply -f -
 
 # Build OJS image for FSTU
 echo "Building OJS image for FSTU..."
-cd ../../../docker
+# Get the script directory to build paths relative to project root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+
+cd "$PROJECT_ROOT/docker"
 docker build -t ojs-fstu:latest .
 docker save ojs-fstu:latest -o ojs-fstu.tar
 
@@ -17,7 +21,7 @@ k3s ctr images import ojs-fstu.tar
 
 # Apply OJS configurations
 echo "Applying OJS configurations..."
-cd ../k8s/overlays/fstu
+cd "$PROJECT_ROOT/k8s/overlays/fstu"
 kubectl apply -f ojs-pvc.yaml
 kubectl apply -f ojs-configmap.yaml
 kubectl apply -f ojs-mysql-deployment.yaml
