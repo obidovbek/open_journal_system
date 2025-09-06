@@ -9,15 +9,9 @@ metadata:
 data:
   OJS_DB_HOST: "ojs-mysql-service-fstu"
   OJS_DB_NAME: "ojs_fstu_db"
-  BASE_URL: "https://publications.fstu.uz"
+  BASE_URL: "http://publications.fstu.uz"
   db-name: "ojs_fstu_db"
-  base-url: "https://publications.fstu.uz"
-  # Force HTTPS and fix mixed content issues
-  force-ssl-redirect: "On"
-  disable-path-info: "Off"
-  # Additional OJS configuration
-  installed: "Off"
-  restful-urls: "On"
+  base-url: "http://publications.fstu.uz"
 ---
 # OJS FSTU Secret
 apiVersion: v1

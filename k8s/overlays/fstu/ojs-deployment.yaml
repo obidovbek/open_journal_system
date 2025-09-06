@@ -21,11 +21,11 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
-          env:
-            - name: HTTPS
-              value: "on"
-            - name: SERVER_NAME
-              value: "publications.fstu.uz"
+          envFrom:
+            - configMapRef:
+                name: ojs-fstu-config
+            - secretRef:
+                name: ojs-fstu-secret
           volumeMounts:
             - name: ojs-files
               mountPath: /var/www/files

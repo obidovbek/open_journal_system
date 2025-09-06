@@ -9,24 +9,15 @@ RUN apk update && apk add --no-cache \
     zip \
     unzip
 
-# Copy custom configuration directly (no template processing)
-COPY config/config.inc.php /var/www/html/config.inc.php
+# Copy custom configuration if needed
+COPY config/ /var/www/html/config/
 
-# Fix Apache DocumentRoot to point to /var/www/html
-RUN sed -i 's|DocumentRoot "/var/www/localhost/htdocs"|DocumentRoot "/var/www/html"|g' /etc/apache2/httpd.conf && \
-    sed -i 's|<Directory "/var/www/localhost/htdocs">|<Directory "/var/www/html">|g' /etc/apache2/httpd.conf
-
-# Set proper permissions and ensure directories exist
-RUN mkdir -p /var/www/files /var/www/html/public /var/www/html/cache && \
-    chmod -R 755 /var/www/files /var/www/html/public /var/www/html/cache && \
-    chmod 644 /var/www/html/config.inc.php
-
-# Set environment variables for HTTPS
-ENV HTTPS=on
-ENV SERVER_NAME=publications.fstu.uz
+# The base image already has proper permissions set up
+# Just ensure config files have correct permissions
+RUN chmod -R 644 /var/www/html/config/
 
 # Expose port
 EXPOSE 80
 
-# Use the default OJS entrypoint
+# Use the same CMD as the base image (don't override it)
 # The base image already has the correct startup command 
