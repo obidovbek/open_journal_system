@@ -16,16 +16,17 @@ spec:
         app: ojs-fstu
     spec:
       securityContext:
-        fsGroup: 33 # Ensure volumes are owned by www-data group
+        fsGroup: 82 # Ensure volumes are owned by www-data group (Alpine UID 82)
       initContainers:
         - name: fix-permissions
           image: busybox:1.35
           command: ["sh", "-c"]
           args:
             - |
-              chown -R 33:33 /var/www/files /var/www/html/public /var/www/html/cache /var/www/logs
-              chmod -R 755 /var/www/files /var/www/html/public /var/www/html/cache /var/www/logs
-              chmod -R 666 /var/www/html/config.inc.php 2>/dev/null || echo "config.inc.php not found, will be created"
+              mkdir -p /var/www/html/cache/opcache /var/www/logs
+              chown -R 82:82 /var/www/files /var/www/html/public /var/www/html/cache /var/www/logs
+              chmod -R 775 /var/www/files /var/www/html/public /var/www/html/cache /var/www/logs
+              chmod 664 /var/www/html/config/config.inc.php 2>/dev/null || echo "config.inc.php not found, will be created"
           volumeMounts:
             - name: ojs-files
               mountPath: /var/www/files
