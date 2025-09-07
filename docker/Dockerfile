@@ -12,9 +12,9 @@ RUN apk update && apk add --no-cache \
 # Copy custom configuration if needed
 COPY config/ /var/www/html/config/
 
-# The base image already has proper permissions set up
-# Just ensure config files have correct permissions
-RUN chmod -R 664 /var/www/html/config/
+# Ensure sane permissions on config directory
+RUN find /var/www/html/config -type d -exec chmod 775 {} \; \
+    && find /var/www/html/config -type f -exec chmod 664 {} \;
 
 # Ensure cache directories exist and are writable by the web server user
 # Alpine base image may not include a www-data user. Create it so chown works.
