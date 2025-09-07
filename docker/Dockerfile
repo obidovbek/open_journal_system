@@ -16,16 +16,6 @@ COPY config/ /var/www/html/config/
 # Just ensure config files have correct permissions
 RUN chmod -R 644 /var/www/html/config/
 
-# Ensure cache directories exist and are writable by the web server user
-# Alpine base image may not include a www-data user. Create it so chown works.
-RUN getent group www-data || addgroup -g 82 -S www-data \
-    && getent passwd www-data || adduser -u 82 -S -G www-data www-data
-
-# Now adjust ownership/permissions
-RUN mkdir -p /var/www/html/cache/opcache \
-    && chown -R www-data:www-data /var/www/html/cache \
-    && chmod -R 775 /var/www/html/cache
-
 # Expose port
 EXPOSE 80
 #
