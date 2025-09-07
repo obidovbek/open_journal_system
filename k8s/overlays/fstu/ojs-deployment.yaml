@@ -16,17 +16,16 @@ spec:
         app: ojs-fstu
     spec:
       securityContext:
-        fsGroup: 82 # Ensure volumes are owned by www-data group (Alpine UID 82)
+        fsGroup: 33 # Ensure volumes are owned by www-data group
       initContainers:
         - name: fix-permissions
           image: busybox:1.35
           command: ["sh", "-c"]
           args:
             - |
-              mkdir -p /var/www/html/cache/opcache /var/www/logs
-              chown -R 82:82 /var/www/files /var/www/html/public /var/www/html/cache /var/www/logs
-              chmod -R 775 /var/www/files /var/www/html/public /var/www/html/cache /var/www/logs
-              chmod 664 /var/www/html/config/config.inc.php 2>/dev/null || echo "config.inc.php not found, will be created"
+              chown -R 33:33 /var/www/files /var/www/html/public /var/www/html/cache /var/www/logs
+              chmod -R 755 /var/www/files /var/www/html/public /var/www/html/cache /var/www/logs
+              chmod -R 666 /var/www/html/config.inc.php 2>/dev/null || echo "config.inc.php not found, will be created"
           volumeMounts:
             - name: ojs-files
               mountPath: /var/www/files
@@ -44,11 +43,6 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
-          env:
-            - name: HTTPS
-              value: "on"
-            - name: SERVER_PORT
-              value: "443"
           envFrom:
             - configMapRef:
                 name: ojs-fstu-config
@@ -64,16 +58,8 @@ spec:
             - name: ojs-logs
               mountPath: /var/www/logs
           securityContext:
-            runAsUser: 82
-            runAsGroup: 82
-            allowPrivilegeEscalation: false
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 80
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            failureThreshold: 6
+            runAsUser: 0 # Run as root initially for setup
+            allowPrivilegeEscalation: true
           resources:
             requests:
               memory: "512Mi"
