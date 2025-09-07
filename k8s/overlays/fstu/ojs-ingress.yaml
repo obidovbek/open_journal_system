@@ -4,7 +4,9 @@ metadata:
   name: ojs-fstu-ingress
   namespace: ojs-fstu
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares: ojs-fstu-ojs-set-https@kubernetescrd
+    traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   ingressClassName: traefik
   rules:
@@ -18,3 +20,6 @@ spec:
                 name: ojs-service-fstu
                 port:
                   number: 80
+  tls:
+    - hosts:
+        - publications.fstu.uz
