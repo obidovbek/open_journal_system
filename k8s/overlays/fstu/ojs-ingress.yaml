@@ -4,16 +4,10 @@ metadata:
   name: ojs-fstu-ingress
   namespace: ojs-fstu
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.tls: "true"
-    traefik.ingress.kubernetes.io/redirect-entry-point: websecure
-    traefik.ingress.kubernetes.io/router.middlewares: ojs-fstu/https-headers@kubernetescrd
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares: ojs-fstu-https-headers@kubernetescrd
 spec:
   ingressClassName: traefik
-  tls:
-    - hosts:
-        - publications.fstu.uz
-      secretName: publications-fstu-tls # must exist or be managed by cert-manager
   rules:
     - host: publications.fstu.uz
       http:
