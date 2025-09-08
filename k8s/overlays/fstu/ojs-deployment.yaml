@@ -15,6 +15,25 @@ spec:
       labels:
         app: ojs-fstu
     spec:
+      securityContext:
+        fsGroup: 33 # Ensure volumes are owned by www-data group
+      initContainers:
+        - name: fix-permissions
+          image: busybox:1.35
+          command: ["sh", "-c"]
+          args:
+            - |
+              chown -R 33:33 /var/www/files /var/www/html/public /var/www/html/cache
+              chmod -R 755 /var/www/files /var/www/html/public /var/www/html/cache
+          volumeMounts:
+            - name: ojs-files
+              mountPath: /var/www/files
+            - name: ojs-public
+              mountPath: /var/www/html/public
+            - name: ojs-cache
+              mountPath: /var/www/html/cache
+          securityContext:
+            runAsUser: 0 # Run as root to fix permissions
       containers:
         - name: ojs
           image: ojs-fstu:latest
@@ -31,6 +50,11 @@ spec:
               mountPath: /var/www/files
             - name: ojs-public
               mountPath: /var/www/html/public
+            - name: ojs-cache
+              mountPath: /var/www/html/cache
+          securityContext:
+            runAsUser: 33 # www-data user
+            runAsGroup: 33 # www-data group
           resources:
             requests:
               memory: "512Mi"
@@ -45,6 +69,8 @@ spec:
         - name: ojs-public
           persistentVolumeClaim:
             claimName: ojs-public-fstu-pvc
+        - name: ojs-cache
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
