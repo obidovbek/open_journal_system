@@ -24,6 +24,17 @@ RUN printf "\n# Trust reverse proxy HTTPS\nSetEnvIf X-Forwarded-Proto \"https\" 
 COPY https_forwarded.php /var/www/html/https_forwarded.php
 COPY .user.ini /var/www/html/.user.ini
 
+# Add Apache HTTPS configuration
+COPY apache-https.conf /etc/apache2/conf-available/https-proxy.conf
+RUN a2enconf https-proxy
+
+# Enable required Apache modules for HTTPS detection
+RUN a2enmod headers rewrite setenvif
+
+# Ensure proper permissions for all copied files
+RUN chown -R www-data:www-data /var/www/html/https_forwarded.php /var/www/html/.user.ini
+RUN chmod 644 /var/www/html/https_forwarded.php /var/www/html/.user.ini
+
 # Expose port
 EXPOSE 80
 #
