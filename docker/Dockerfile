@@ -28,8 +28,8 @@ COPY .user.ini /var/www/html/.user.ini
 COPY apache-https.conf /tmp/https-proxy.conf
 RUN cat /tmp/https-proxy.conf >> /etc/apache2/httpd.conf && rm /tmp/https-proxy.conf
 
-# Ensure proper permissions for all copied files
-RUN chown -R www-data:www-data /var/www/html/https_forwarded.php /var/www/html/.user.ini
+# Ensure proper permissions for all copied files (use apache user for Alpine)
+RUN chown apache:apache /var/www/html/https_forwarded.php /var/www/html/.user.ini
 RUN chmod 644 /var/www/html/https_forwarded.php /var/www/html/.user.ini
 
 # Expose port
