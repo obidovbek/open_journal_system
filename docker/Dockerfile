@@ -18,6 +18,6 @@ RUN chmod -R 644 /var/www/html/config/
 
 # Expose port
 EXPOSE 80
-
+#
 # Use the same CMD as the base image (don't override it)
 # The base image already has the correct startup command 
