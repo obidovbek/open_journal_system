@@ -15,28 +15,6 @@ spec:
       labels:
         app: ojs-fstu
     spec:
-      securityContext:
-        fsGroup: 82 # Ensure volumes are owned by www-data group (Alpine www-data UID/GID 82)
-      initContainers:
-        - name: fix-permissions
-          image: busybox:1.35
-          command: ["sh", "-c"]
-          args:
-            - |
-              chown -R 82:82 /var/www/files /var/www/html/public /var/www/html/cache /var/www/logs
-              chmod -R 775 /var/www/files /var/www/html/public /var/www/html/cache /var/www/logs
-              chmod -R 666 /var/www/html/config.inc.php 2>/dev/null || echo "config.inc.php not found, will be created"
-          volumeMounts:
-            - name: ojs-files
-              mountPath: /var/www/files
-            - name: ojs-public
-              mountPath: /var/www/html/public
-            - name: ojs-cache
-              mountPath: /var/www/html/cache
-            - name: ojs-logs
-              mountPath: /var/www/logs
-          securityContext:
-            runAsUser: 0 # Run as root to fix permissions
       containers:
         - name: ojs
           image: ojs-fstu:latest
@@ -53,13 +31,6 @@ spec:
               mountPath: /var/www/files
             - name: ojs-public
               mountPath: /var/www/html/public
-            - name: ojs-cache
-              mountPath: /var/www/html/cache
-            - name: ojs-logs
-              mountPath: /var/www/logs
-          securityContext:
-            runAsUser: 0 # Run as root initially for setup
-            allowPrivilegeEscalation: true
           resources:
             requests:
               memory: "512Mi"
@@ -74,10 +45,6 @@ spec:
         - name: ojs-public
           persistentVolumeClaim:
             claimName: ojs-public-fstu-pvc
-        - name: ojs-cache
-          emptyDir: {}
-        - name: ojs-logs
-          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
