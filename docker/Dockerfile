@@ -16,6 +16,10 @@ COPY config/ /var/www/html/config/
 # Just ensure config files have correct permissions
 RUN chmod -R 644 /var/www/html/config/
 
+# Trust HTTPS from reverse proxies (Traefik/Nginx) so OJS generates https URLs
+# and avoids mixed-content errors when TLS is terminated upstream.
+RUN printf "\n# Trust reverse proxy HTTPS\nSetEnvIf X-Forwarded-Proto \"https\" HTTPS=on\nSetEnvIf X-Forwarded-Port \"443\" SERVER_PORT=443\n" >> /var/www/html/.htaccess
+
 # Expose port
 EXPOSE 80
 #
