@@ -36,6 +36,10 @@ public_files_dir = /var/www/html/public
 
 ; Base URL - will be overridden by environment variable
 base_url = https://publications.fstu.uz
+base_url[index] = https://publications.fstu.uz
+
+; Enforce HTTPS site-wide so assets/forms use https
+force_ssl = On
 
 ; Session settings
 session_lifetime = 30

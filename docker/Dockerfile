@@ -20,6 +20,10 @@ RUN chmod -R 644 /var/www/html/config/
 # and avoids mixed-content errors when TLS is terminated upstream.
 RUN printf "\n# Trust reverse proxy HTTPS\nSetEnvIf X-Forwarded-Proto \"https\" HTTPS=on\nSetEnvIf X-Forwarded-Port \"443\" SERVER_PORT=443\n" >> /var/www/html/.htaccess
 
+# Add PHP auto-prepend to enforce HTTPS when forwarded
+COPY https_forwarded.php /var/www/html/https_forwarded.php
+COPY .user.ini /var/www/html/.user.ini
+
 # Expose port
 EXPOSE 80
 #
