@@ -12,40 +12,35 @@ RUN apk update && apk add --no-cache \
 # Copy custom configuration if needed
 COPY config/ /var/www/html/config/
 
-# Create a startup script to handle proxy configuration
-RUN cat > /usr/local/bin/ojs-start.sh << 'EOF'
-#!/bin/sh
+# Create proxy setup PHP file
+RUN echo '<?php' > /var/www/html/proxy-setup.php && \
+    echo '// Set up proxy detection for OJS' >> /var/www/html/proxy-setup.php && \
+    echo 'if (isset($_SERVER["HTTP_X_FORWARDED_PROTO"]) && $_SERVER["HTTP_X_FORWARDED_PROTO"] === "https") {' >> /var/www/html/proxy-setup.php && \
+    echo '    $_SERVER["HTTPS"] = "on";' >> /var/www/html/proxy-setup.php && \
+    echo '    $_SERVER["SERVER_PORT"] = 443;' >> /var/www/html/proxy-setup.php && \
+    echo '}' >> /var/www/html/proxy-setup.php && \
+    echo 'if (isset($_SERVER["HTTP_X_FORWARDED_PORT"])) {' >> /var/www/html/proxy-setup.php && \
+    echo '    $_SERVER["SERVER_PORT"] = $_SERVER["HTTP_X_FORWARDED_PORT"];' >> /var/www/html/proxy-setup.php && \
+    echo '}' >> /var/www/html/proxy-setup.php
 
-# Set environment variables for HTTPS detection
-export HTTPS=on
-export HTTP_X_FORWARDED_PROTO=https
-export HTTP_X_FORWARDED_PORT=443
-export SERVER_PORT=443
+# Create PHP configuration for proxy
+RUN echo '; Proxy configuration for OJS' > /usr/local/etc/php/conf.d/99-proxy.ini && \
+    echo '; Trust proxy headers' >> /usr/local/etc/php/conf.d/99-proxy.ini && \
+    echo 'auto_prepend_file = /var/www/html/proxy-setup.php' >> /usr/local/etc/php/conf.d/99-proxy.ini
 
-# Update PHP configuration for proxy handling
-echo "Setting up PHP for proxy..."
-cat >> /usr/local/etc/php/conf.d/99-proxy.ini << 'PHPEOF'
-; Proxy configuration for OJS
-; Trust proxy headers
-auto_prepend_file = /var/www/html/proxy-setup.php
-PHPEOF
-
-# Create proxy setup file
-cat > /var/www/html/proxy-setup.php << 'PHPSETUP'
-<?php
-// Set up proxy detection for OJS
-if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-    $_SERVER['HTTPS'] = 'on';
-    $_SERVER['SERVER_PORT'] = 443;
-}
-if (isset($_SERVER['HTTP_X_FORWARDED_PORT'])) {
-    $_SERVER['SERVER_PORT'] = $_SERVER['HTTP_X_FORWARDED_PORT'];
-}
-PHPSETUP
-
-# Start the original OJS process
-exec /usr/local/bin/apache2-foreground
-EOF
+# Create startup script
+RUN echo '#!/bin/sh' > /usr/local/bin/ojs-start.sh && \
+    echo '' >> /usr/local/bin/ojs-start.sh && \
+    echo '# Set environment variables for HTTPS detection' >> /usr/local/bin/ojs-start.sh && \
+    echo 'export HTTPS=on' >> /usr/local/bin/ojs-start.sh && \
+    echo 'export HTTP_X_FORWARDED_PROTO=https' >> /usr/local/bin/ojs-start.sh && \
+    echo 'export HTTP_X_FORWARDED_PORT=443' >> /usr/local/bin/ojs-start.sh && \
+    echo 'export SERVER_PORT=443' >> /usr/local/bin/ojs-start.sh && \
+    echo '' >> /usr/local/bin/ojs-start.sh && \
+    echo 'echo "Starting OJS with HTTPS proxy support..."' >> /usr/local/bin/ojs-start.sh && \
+    echo '' >> /usr/local/bin/ojs-start.sh && \
+    echo '# Start the original OJS process' >> /usr/local/bin/ojs-start.sh && \
+    echo 'exec /usr/local/bin/apache2-foreground' >> /usr/local/bin/ojs-start.sh
 
 RUN chmod +x /usr/local/bin/ojs-start.sh
 
