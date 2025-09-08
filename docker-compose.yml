@@ -22,10 +22,15 @@ services:
       - OJS_DB_USER=${OJS_DB_USER:-ojs_user}
       - OJS_DB_PASSWORD=${OJS_DB_PASSWORD:-ojs_password}
       - OJS_DB_NAME=${OJS_DB_NAME:-ojs_db}
-      - BASE_URL=${OJS_BASE_URL:-http://localhost:8081}
+      - BASE_URL=${OJS_BASE_URL:-https://publications.fstu.uz}
+      - HTTPS=on
+      - HTTP_X_FORWARDED_PROTO=https
+      - HTTP_X_FORWARDED_PORT=443
+      - SERVER_PORT=443
     volumes:
       - ./data/ojs_files:/var/www/files
       - ./data/ojs_public:/var/www/html/public
+      - ./docker/config/config.inc.php:/var/www/html/config.inc.php:ro
     networks:
       - ojs_network
     restart: unless-stopped

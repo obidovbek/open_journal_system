@@ -34,18 +34,24 @@ salt = "OJSSaltChangeThis"
 files_dir = /var/www/files
 public_files_dir = /var/www/html/public
 
-; Base URL - will be overridden by environment variable
+; Base URL - MUST be HTTPS for your domain
 base_url = https://publications.fstu.uz
-base_url[index] = https://publications.fstu.uz
 
-; Enforce HTTPS site-wide so assets/forms use https
+; Force SSL/HTTPS for all requests
 force_ssl = On
+
+; Trust proxy headers (important for reverse proxy setups)
+; This allows OJS to properly detect HTTPS when behind nginx proxy
+trusted_proxies = "192.168.10.0/24,172.16.0.0/12,10.0.0.0/8,127.0.0.1"
+
+; Force login over SSL
+force_login_ssl = On
 
 ; Session settings
 session_lifetime = 30
 
 ; Email settings
-default_envelope_sender = noreply@yourdomain.com
+default_envelope_sender = noreply@fstu.uz
 allow_envelope_sender = On
 
 ; Captcha settings
@@ -54,6 +60,10 @@ captcha = off
 ; Debugging
 show_stacktrace = Off
 log_errors = On
+
+; Additional security settings for proxy setup
+; Allow OJS to detect the real client IP behind proxy
+proxy_x_forwarded_for = On
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ; Database Settings  ;
@@ -87,4 +97,13 @@ smtp_port = 25
 
 [debug]
 deprecation_warnings = Off
-display_errors = Off 
+display_errors = Off
+
+;;;;;;;;;;;;;;;;;;;;;
+; Security Settings ;
+;;;;;;;;;;;;;;;;;;;;;
+
+[security]
+; Force secure cookies when using HTTPS
+force_ssl = On
+allowed_hosts = "publications.fstu.uz" 
