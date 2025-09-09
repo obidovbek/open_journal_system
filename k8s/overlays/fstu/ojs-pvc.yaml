@@ -31,7 +31,7 @@ spec:
     path: /opt/local-path-provisioner/ojs-files-data-fstu
 
 ---
-# OJS Public Files PersistentVolume
+# OJS Public Files PersistentVolumes
 apiVersion: v1
 kind: PersistentVolume
 metadata:
