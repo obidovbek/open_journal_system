@@ -37,8 +37,8 @@ RUN cat /tmp/https-proxy.conf >> /etc/apache2/httpd.conf && rm /tmp/https-proxy.
 RUN chown apache:apache /var/www/html/https_forwarded.php /var/www/html/.user.ini
 RUN chmod 644 /var/www/html/https_forwarded.php /var/www/html/.user.ini
 
-# Create additional .htaccess rules for HTTPS enforcement
-RUN printf "\n# Force HTTPS for all requests\nRewriteEngine On\nRewriteCond %%{HTTP:X-Forwarded-Proto} !https\nRewriteCond %%{HTTP_HOST} ^publications\\.fstu\\.uz$\nRewriteRule ^(.*)$ https://%%{HTTP_HOST}%%{REQUEST_URI} [R=301,L]\n" >> /var/www/html/.htaccess
+# DO NOT add HTTPS redirect rules here - nginx handles the HTTPS redirect
+# The container should only handle HTTPS detection, not redirects
 
 # Expose port
 EXPOSE 80

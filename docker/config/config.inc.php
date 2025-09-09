@@ -32,9 +32,8 @@ proxy_x_forwarded_host = On
 proxy_x_forwarded_proto = On
 proxy_x_forwarded_port = On
 
-; Force HTTPS URL generation
-force_login_ssl = On
-force_ssl = On
+; IMPORTANT: Don't force login SSL redirects - let nginx handle all redirects
+; force_login_ssl = Off  ; Commented out to prevent internal redirects
 
 session_lifetime = 30
 
