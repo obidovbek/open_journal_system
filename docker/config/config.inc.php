@@ -20,19 +20,34 @@ files_dir = /var/www/files         ; keep outside web root
 base_url = "https://publications.fstu.uz"
 base_url[index] = "https://publications.fstu.uz"
 
+; Critical HTTPS settings for reverse proxy
 force_ssl = On                     ; requires correct X-Forwarded-Proto from proxy
 session_cookie_secure = On
 trust_x_forwarded_for = On
+allowed_hosts = "publications.fstu.uz"
+
+; Additional proxy settings
+proxy_x_forwarded_for = On
+proxy_x_forwarded_host = On
+proxy_x_forwarded_proto = On
+proxy_x_forwarded_port = On
+
+; Force HTTPS URL generation
+force_login_ssl = On
+force_ssl = On
 
 session_lifetime = 30
 
-default_envelope_sender = "noreply@yourdomain.com"
+default_envelope_sender = "noreply@fstu.uz"
 allow_envelope_sender = On
 
 captcha = off
 
 show_stacktrace = Off
 log_errors = On
+
+; Security headers
+disable_path_info = Off
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ; Database Settings  ;
@@ -76,3 +91,11 @@ smtp_port = 25
 [debug]
 deprecation_warnings = Off
 display_errors = Off
+
+;;;;;;;;;;;;;;;;;;;;
+; Security Settings ;
+;;;;;;;;;;;;;;;;;;;;
+
+[security]
+; Additional security for HTTPS
+allowed_hosts = "publications.fstu.uz"

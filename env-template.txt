@@ -18,6 +18,10 @@ OJS_DEFAULT_ENVELOPE_SENDER=noreply@fstu.uz
 OJS_SMTP_SERVER=localhost
 OJS_SMTP_PORT=25
 
-# Debug Settings
+# Debug Settings (set to 'true' only for troubleshooting)
 OJS_DEBUG=false
-OJS_SHOW_STACKTRACE=false 
+OJS_SHOW_STACKTRACE=false
+
+# Additional HTTPS Configuration
+OJS_FORCE_SSL=true
+OJS_TRUST_X_FORWARDED=true 

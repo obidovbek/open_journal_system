@@ -27,6 +27,9 @@ services:
       - HTTP_X_FORWARDED_PROTO=https
       - HTTP_X_FORWARDED_PORT=443
       - SERVER_PORT=443
+      - SERVER_NAME=publications.fstu.uz
+      # Debug mode (set to 'true' for troubleshooting, 'false' for production)
+      - OJS_DEBUG=${OJS_DEBUG:-false}
     volumes:
       - ./data/ojs_files:/var/www/files
       - ./data/ojs_public:/var/www/html/public
@@ -34,6 +37,12 @@ services:
     networks:
       - ojs_network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/index.php/index/about"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   ojs-mysql:
     env_file:
@@ -49,6 +58,23 @@ services:
       - "3307:3306"
     volumes:
       - ./data/mysql:/var/lib/mysql
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d
     networks:
       - ojs_network
     restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p${OJS_MYSQL_ROOT_PASSWORD:-root_password}",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
