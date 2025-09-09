@@ -1,34 +1,53 @@
-# OJS FSTU Persistent Volume Claims
+# OJS FSTU Persistent Volumes and Claims
+# MySQL Data PersistentVolume
 apiVersion: v1
-kind: PersistentVolumeClaim
+kind: PersistentVolume
 metadata:
-  name: ojs-files-fstu-pvc
-  namespace: ojs-fstu
-  labels:
-    app: ojs-fstu
+  name: ojs-mysql-pv-fstu
 spec:
+  capacity:
+    storage: 20Gi
   accessModes:
     - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi
   storageClassName: local-path
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /opt/local-path-provisioner/ojs-mysql-data-fstu
+
 ---
+# OJS Files PersistentVolume
 apiVersion: v1
-kind: PersistentVolumeClaim
+kind: PersistentVolume
 metadata:
-  name: ojs-public-fstu-pvc
-  namespace: ojs-fstu
-  labels:
-    app: ojs-fstu
+  name: ojs-files-pv-fstu
 spec:
+  capacity:
+    storage: 10Gi
   accessModes:
     - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
   storageClassName: local-path
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /opt/local-path-provisioner/ojs-files-data-fstu
+
 ---
+# OJS Public Files PersistentVolume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ojs-public-pv-fstu
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /opt/local-path-provisioner/ojs-public-data-fstu
+
+---
+# MySQL Data PersistentVolumeClaim
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -42,4 +61,41 @@ spec:
   resources:
     requests:
       storage: 20Gi
+  volumeName: ojs-mysql-pv-fstu
+  storageClassName: local-path
+
+---
+# OJS Files PersistentVolumeClaim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ojs-files-fstu-pvc
+  namespace: ojs-fstu
+  labels:
+    app: ojs-fstu
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  volumeName: ojs-files-pv-fstu
+  storageClassName: local-path
+
+---
+# OJS Public Files PersistentVolumeClaim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ojs-public-fstu-pvc
+  namespace: ojs-fstu
+  labels:
+    app: ojs-fstu
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: ojs-public-pv-fstu
   storageClassName: local-path
