@@ -23,7 +23,7 @@ docker-compose build --no-cache ojs
 # Start services
 echo "🚀 Starting services..."
 docker-compose up -d
-
+#
 # Wait for services to be ready
 echo "⏳ Waiting for services to start..."
 sleep 10
