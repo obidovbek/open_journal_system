@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ojs-deployment-fstu
+  namespace: ojs-fstu
+  labels:
+    app: ojs-fstu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ojs-fstu
+  template:
+    metadata:
+      labels:
+        app: ojs-fstu
+    spec:
+      # Init container to fix permissions
+      initContainers:
+        - name: fix-permissions
+          image: busybox:1.35
+          command:
+            - sh
+            - -c
+            - |
+              echo "Fixing directory permissions..."
+              mkdir -p /var/www/files /var/www/html/public
+              chown -R 100:101 /var/www/files /var/www/html/public
+              chmod -R 755 /var/www/files /var/www/html/public
+              ls -la /var/www/
+          volumeMounts:
+            - name: ojs-files
+              mountPath: /var/www/files
+            - name: ojs-public
+              mountPath: /var/www/html/public
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+      containers:
+        - name: ojs
+          image: ojs-fstu:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          env:
+            # Database connection
+            - name: OJS_DB_HOST
+              value: "ojs-mysql-service-fstu"
+            - name: OJS_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: ojs-fstu-config
+                  key: db-name
+            - name: OJS_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: ojs-fstu-secret
+                  key: db-user
+            - name: OJS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ojs-fstu-secret
+                  key: db-password
+            # HTTPS proxy settings
+            - name: BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ojs-fstu-config
+                  key: base-url
+            - name: HTTPS
+              value: "on"
+            - name: HTTP_X_FORWARDED_PROTO
+              value: "https"
+            - name: HTTP_X_FORWARDED_PORT
+              value: "443"
+            - name: SERVER_PORT
+              value: "443"
+            - name: SERVER_NAME
+              value: "publications.fstu.uz"
+          volumeMounts:
+            - name: ojs-files
+              mountPath: /var/www/files
+            - name: ojs-public
+              mountPath: /var/www/html/public
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          # Run as apache user
+          securityContext:
+            runAsUser: 100
+            runAsGroup: 101
+            fsGroup: 101
+      volumes:
+        - name: ojs-files
+          persistentVolumeClaim:
+            claimName: ojs-files-fstu-pvc
+        - name: ojs-public
+          persistentVolumeClaim:
+            claimName: ojs-public-fstu-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ojs-service-fstu
+  namespace: ojs-fstu
+  labels:
+    app: ojs-fstu
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app: ojs-fstu

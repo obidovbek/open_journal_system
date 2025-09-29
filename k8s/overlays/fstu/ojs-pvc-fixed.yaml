@@ -1,0 +1,52 @@
+# OJS FSTU Persistent Volume Claims - Fixed Version
+# This uses dynamic provisioning to prevent binding issues
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ojs-mysql-fstu-pvc
+  namespace: ojs-fstu
+  labels:
+    app: ojs-mysql-fstu
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: local-path
+  # Remove volumeName to allow dynamic binding
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ojs-files-fstu-pvc
+  namespace: ojs-fstu
+  labels:
+    app: ojs-fstu
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: local-path
+  # Remove volumeName to allow dynamic binding
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ojs-public-fstu-pvc
+  namespace: ojs-fstu
+  labels:
+    app: ojs-fstu
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-path
+  # Remove volumeName to allow dynamic binding
