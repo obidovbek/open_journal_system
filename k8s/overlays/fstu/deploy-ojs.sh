@@ -21,7 +21,7 @@ k3s ctr images import ojs-fstu.tar
 
 # Apply OJS configurations
 echo "Applying OJS configurations..."
-cd "$PROJECT_ROOT/k8s/overlays/fstu"
+cd ../../k8s/overlays/fstu/
 kubectl apply -f ojs-pvc.yaml
 kubectl apply -f ojs-configmap.yaml
 kubectl apply -f ojs-mysql-deployment.yaml
