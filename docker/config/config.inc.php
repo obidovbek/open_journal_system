@@ -53,8 +53,9 @@ disable_path_info = Off
 ;;;;;;;;;;;;;;;;;;;;;;
 
 [database]
-driver = mysql
-host = ojs-mysql
+driver = mysqli
+host = ojs-mysql-service-fstu
+port = 3306
 username = ojs_user
 password = secure_ojs_password
 name = ojs_db
