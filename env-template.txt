@@ -6,6 +6,7 @@ OJS_DB_NAME=ojs_db
 OJS_DB_USER=ojs_user
 OJS_DB_PASSWORD=secure_ojs_password
 OJS_MYSQL_ROOT_PASSWORD=secure_mysql_root_password
+# mysql -h localhost -u ojs_user -p ojs_db
 
 # OJS Application Configuration
 OJS_BASE_URL=https://publications.fstu.uz
