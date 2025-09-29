@@ -15,16 +15,18 @@ spec:
       labels:
         app: ojs-fstu
     spec:
-      # Run the workload as 'apache' (Alpine) and make volumes group-writable
+      # Keep volumes group-writable; don't force all containers to run as 82 here
       securityContext:
-        runAsUser: 82
-        runAsGroup: 82
         fsGroup: 82
         fsGroupChangePolicy: "OnRootMismatch"
 
       initContainers:
         - name: fix-permissions
           image: busybox:1.36
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+            allowPrivilegeEscalation: false
           command: ["sh", "-c"]
           args:
             - |
@@ -45,6 +47,9 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
+          securityContext:
+            runAsUser: 82
+            runAsGroup: 82
           envFrom:
             - configMapRef:
                 name: ojs-fstu-config
