@@ -22,7 +22,7 @@ OJS_DB_USER=ojs_fstu_user
 OJS_DB_PASSWORD=secure_ojs_fstu_password
 OJS_MYSQL_ROOT_PASSWORD=secure_mysql_root_password
 
-# OJS Application Configuration
+# OJS Application Configurationdd
 OJS_BASE_URL=https://publications.fstu.uz
 
 # Security Settings (Generate new values for production)
