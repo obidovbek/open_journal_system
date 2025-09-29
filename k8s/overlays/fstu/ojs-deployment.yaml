@@ -15,9 +15,11 @@ spec:
       labels:
         app: ojs-fstu
     spec:
-      # Ensure mounted volumes are group-writable by the pod's supplemental group
+      # Run the workload as 'apache' (Alpine) and make volumes group-writable
       securityContext:
-        fsGroup: 33 # www-data group (works for Debian/Apache-PHP images)
+        runAsUser: 82
+        runAsGroup: 82
+        fsGroup: 82
         fsGroupChangePolicy: "OnRootMismatch"
 
       initContainers:
@@ -27,12 +29,10 @@ spec:
           args:
             - |
               set -eux
-              # create required dirs on mounted PVCs
               mkdir -p /var/www/files /var/www/html/public
-              # group-writable + setgid so new files inherit the group
-              chmod -R 2775 /var/www/files /var/www/html/public
-              # try to chgrp to fsGroup (33); ignore if not present
-              chgrp -R 33 /var/www/files /var/www/html/public || true
+              chown -R 82:82 /var/www/files /var/www/html/public
+              # safest during install; you can tighten later to 2775
+              chmod -R 0777 /var/www/files /var/www/html/public
           volumeMounts:
             - name: ojs-files
               mountPath: /var/www/files
