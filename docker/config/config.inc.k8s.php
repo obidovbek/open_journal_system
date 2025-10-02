@@ -100,3 +100,4 @@ display_errors = Off
 [security]
 ; Additional security for HTTPS
 allowed_hosts = "publications.fstu.uz"
+

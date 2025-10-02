@@ -26,3 +26,17 @@ OJS_SHOW_STACKTRACE=false
 # Additional HTTPS Configuration
 OJS_FORCE_SSL=true
 OJS_TRUST_X_FORWARDED=true 
+
+
+publications
+CAtRixORtLED
+
+publications@fstu.uz
+
+
+
+
+Host localhost
+Username ojs2
+Password EneTorYpHAWB
+Database name ojs2

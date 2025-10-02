@@ -1,0 +1,50 @@
+# OJS FSTU Production ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ojs-fstu-config
+  namespace: ojs-fstu
+  labels:
+    app: ojs-fstu
+data:
+  # Database configuration
+  OJS_DB_HOST: "ojs-mysql-service-fstu"
+  OJS_DB_NAME: "ojs2"
+  
+  # Application configuration
+  BASE_URL: "https://publications.fstu.uz"
+  OJS_DEFAULT_ENVELOPE_SENDER: "noreply@fstu.uz"
+  OJS_SMTP_SERVER: "localhost"
+  OJS_SMTP_PORT: "25"
+  
+  # HTTPS proxy settings
+  HTTPS: "on"
+  HTTP_X_FORWARDED_PROTO: "https"
+  HTTP_X_FORWARDED_PORT: "443"
+  SERVER_PORT: "443"
+  SERVER_NAME: "publications.fstu.uz"
+  
+  # Security
+  OJS_SALT: "OJSSaltChangeThisInProduction"
+---
+# OJS FSTU Production Secret
+# IMPORTANT: Update these values with your actual production credentials!
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ojs-fstu-secret
+  namespace: ojs-fstu
+  labels:
+    app: ojs-fstu
+type: Opaque
+stringData:
+  # Database credentials - UPDATE THESE WITH YOUR ACTUAL VALUES
+  # For production database (from your env-template.txt):
+  db-user: "ojs2"
+  db-password: "EneTorYpHAWB"
+  mysql-root-password: "secure_mysql_root_password"
+  
+  # Environment variables for OJS container
+  OJS_DB_USER: "ojs2"
+  OJS_DB_PASSWORD: "EneTorYpHAWB"
+

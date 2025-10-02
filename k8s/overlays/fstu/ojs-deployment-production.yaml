@@ -1,0 +1,179 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ojs-deployment-fstu
+  namespace: ojs-fstu
+  labels:
+    app: ojs-fstu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ojs-fstu
+  template:
+    metadata:
+      labels:
+        app: ojs-fstu
+    spec:
+      # Init container to fix permissions
+      initContainers:
+        - name: fix-permissions
+          image: busybox:1.35
+          command:
+            - sh
+            - -c
+            - |
+              echo "Fixing directory permissions..."
+              mkdir -p /var/www/files /var/www/html/public
+              chown -R 100:101 /var/www/files /var/www/html/public
+              chmod -R 755 /var/www/files /var/www/html/public
+              echo "Permissions fixed!"
+              ls -la /var/www/
+          volumeMounts:
+            - name: ojs-files
+              mountPath: /var/www/files
+            - name: ojs-public
+              mountPath: /var/www/html/public
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+      containers:
+        - name: ojs
+          # Use the Kubernetes-specific image with dynamic config generation
+          image: ojs-fstu:k8s
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+          env:
+            # Database connection - read from ConfigMap and Secrets
+            - name: OJS_DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: ojs-fstu-config
+                  key: OJS_DB_HOST
+            - name: OJS_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: ojs-fstu-config
+                  key: OJS_DB_NAME
+            - name: OJS_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: ojs-fstu-secret
+                  key: db-user
+            - name: OJS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ojs-fstu-secret
+                  key: db-password
+            # Application settings
+            - name: BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ojs-fstu-config
+                  key: BASE_URL
+            - name: OJS_DEFAULT_ENVELOPE_SENDER
+              valueFrom:
+                configMapKeyRef:
+                  name: ojs-fstu-config
+                  key: OJS_DEFAULT_ENVELOPE_SENDER
+            - name: OJS_SMTP_SERVER
+              valueFrom:
+                configMapKeyRef:
+                  name: ojs-fstu-config
+                  key: OJS_SMTP_SERVER
+            - name: OJS_SMTP_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ojs-fstu-config
+                  key: OJS_SMTP_PORT
+            - name: OJS_SALT
+              valueFrom:
+                configMapKeyRef:
+                  name: ojs-fstu-config
+                  key: OJS_SALT
+            # HTTPS proxy settings
+            - name: HTTPS
+              valueFrom:
+                configMapKeyRef:
+                  name: ojs-fstu-config
+                  key: HTTPS
+            - name: HTTP_X_FORWARDED_PROTO
+              valueFrom:
+                configMapKeyRef:
+                  name: ojs-fstu-config
+                  key: HTTP_X_FORWARDED_PROTO
+            - name: HTTP_X_FORWARDED_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ojs-fstu-config
+                  key: HTTP_X_FORWARDED_PORT
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ojs-fstu-config
+                  key: SERVER_PORT
+            - name: SERVER_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: ojs-fstu-config
+                  key: SERVER_NAME
+          volumeMounts:
+            - name: ojs-files
+              mountPath: /var/www/files
+            - name: ojs-public
+              mountPath: /var/www/html/public
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          # Health checks
+          livenessProbe:
+            httpGet:
+              path: /index.php/index
+              port: 80
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /index.php/index
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          # Run as apache user
+          securityContext:
+            runAsUser: 100
+            runAsGroup: 101
+      volumes:
+        - name: ojs-files
+          persistentVolumeClaim:
+            claimName: ojs-files-fstu-pvc
+        - name: ojs-public
+          persistentVolumeClaim:
+            claimName: ojs-public-fstu-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ojs-service-fstu
+  namespace: ojs-fstu
+  labels:
+    app: ojs-fstu
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+  selector:
+    app: ojs-fstu
+
