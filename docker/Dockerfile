@@ -1,47 +1,47 @@
 FROM pkpofficial/ojs:3_4_0-5
 
-# Set working directory
 WORKDIR /var/www/html
 
-# Install additional packages and enable Apache modules
-RUN apk update && apk add --no-cache \
-    curl \
-    zip \
-    unzip
+# Qo'shimcha paketlar
+RUN apk update && apk add --no-cache curl zip unzip
 
-# Enable necessary Apache modules for HTTPS proxy handling
+# Apache modullari (agar baza image allaqachon yoqqan bo'lsa, bu qadam idempotent)
 RUN sed -i 's/#LoadModule rewrite_module/LoadModule rewrite_module/' /etc/apache2/httpd.conf && \
     sed -i 's/#LoadModule headers_module/LoadModule headers_module/' /etc/apache2/httpd.conf && \
     sed -i 's/#LoadModule setenvif_module/LoadModule setenvif_module/' /etc/apache2/httpd.conf
 
-# Copy custom configuration if needed
+# OJS konfiguratsiyalari
 COPY config/ /var/www/html/config/
 
-# The base image already has proper permissions set up
-# Just ensure config files have correct permissions
-RUN chmod -R 644 /var/www/html/config/
+# ⚠️ MUHIM: kataloglar yoziladigan bo'lsin (sed TMP fayl yaratadi)
+# Kataloglar 775, fayllar 664, egasi apache:apache
+RUN chown -R apache:apache /var/www/html && \
+    find /var/www/html -type d -exec chmod 775 {} \; && \
+    find /var/www/html -type f -exec chmod 664 {} \;
 
-# Trust HTTPS from reverse proxies (Traefik/Nginx) so OJS generates https URLs
-# and avoids mixed-content errors when TLS is terminated upstream.
+# Reverse proxy ortidan HTTPS ni ishonchli belgilash
 RUN printf "\n# Trust reverse proxy HTTPS\nSetEnvIf X-Forwarded-Proto \"https\" HTTPS=on\nSetEnvIf X-Forwarded-Port \"443\" SERVER_PORT=443\n" >> /var/www/html/.htaccess
 
-# Add PHP auto-prepend to enforce HTTPS when forwarded
+# PHP auto-prepend
 COPY https_forwarded.php /var/www/html/https_forwarded.php
 COPY .user.ini /var/www/html/.user.ini
 
-# Add Apache HTTPS configuration directly to httpd.conf
-COPY apache-https.conf /tmp/https-proxy.conf
+# Apache konfini kengaytirish (TLS talab qilmaydigan qismni qo'shing)
+# Agar sizning apache-https.conf ichida SSLCertificateFile/Key bor bo'lsa, ularni olib tashlang yoki comment qiling
+COPY apache-https-no-tls.conf /tmp/https-proxy.conf
 RUN cat /tmp/https-proxy.conf >> /etc/apache2/httpd.conf && rm /tmp/https-proxy.conf
 
-# Ensure proper permissions for all copied files (use apache user for Alpine)
-RUN chown apache:apache /var/www/html/https_forwarded.php /var/www/html/.user.ini
-RUN chmod 644 /var/www/html/https_forwarded.php /var/www/html/.user.ini
+# Log katalogi (Apache bu yerga yoza olishi shart)
+RUN mkdir -p /var/www/logs && \
+    chown -R apache:apache /var/www/logs && \
+    chmod -R 775 /var/www/logs
 
-# DO NOT add HTTPS redirect rules here - nginx handles the HTTPS redirect
-# The container should only handle HTTPS detection, not redirects
+# (ixtiyoriy) cron ishlamasa ham container yiqilmasin
+# Agar entrypoint crond ni chaqirsa, daryomizga ta'sir qilmaydi:
+ENV OJS_DISABLE_CRON=true
 
-# Expose port
+# Port
 EXPOSE 80
 
-# Use the same CMD as the base image (don't override it)
-# The base image already has the correct startup command 
+# Apache'ni foregroundda ushlab turish (baza image konflikt qilmasa)
+CMD ["sh", "-c", "httpd -D FOREGROUND"]
