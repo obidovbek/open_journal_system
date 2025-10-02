@@ -13,7 +13,7 @@ RUN sed -i 's/#LoadModule rewrite_module/LoadModule rewrite_module/' /etc/apache
 COPY config/ /var/www/html/config/
 
 # ⚠️ MUHIM: OJS asl konfiguratsiya fayli ildizda bo'ladi
-COPY config.inc.php /var/www/html/config.inc.php
+COPY config/config.inc.php /var/www/html/config.inc.php
 
 # HTTPS forwarded belgisi (Traefik TLS terminatsiya qiladi)
 RUN printf "\n# Trust reverse proxy HTTPS\nSetEnvIf X-Forwarded-Proto \"https\" HTTPS=on\nSetEnvIf X-Forwarded-Port \"443\" SERVER_PORT=443\n" >> /var/www/html/.htaccess
