@@ -23,6 +23,6 @@ OJS_SMTP_PORT=25
 OJS_DEBUG=false
 OJS_SHOW_STACKTRACE=false
 
-# Additional HTTPS Configuration
+# Additional HTTPS Configuration d
 OJS_FORCE_SSL=true
 OJS_TRUST_X_FORWARDED=true 
