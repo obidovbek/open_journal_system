@@ -26,3 +26,12 @@ OJS_SHOW_STACKTRACE=false
 # Additional HTTPS Configuration
 OJS_FORCE_SSL=true
 OJS_TRUST_X_FORWARDED=true 
+
+
+kubectl get pods -n ojs-fstu -w
+
+kubectl get pvc -n ojs-fstu
+
+kubectl exec -it -n ojs-fstu ojs-dep-- sh
+
+chmod +x ./k8s/overlays/fstu/deploy-ojs.sh
