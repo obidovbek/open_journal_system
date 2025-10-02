@@ -46,14 +46,14 @@ kubectl apply -f ojs-mysql-deployment.yaml
 kubectl apply -f ojs-deployment.yaml
 kubectl apply -f ojs-ingress.yaml
 
-echo "⏳ Waiting for MySQL to be ready..."
-kubectl rollout status deployment/ojs-mysql-deployment-fstu -n "${NS}"
+# echo "⏳ Waiting for MySQL to be ready..."
+# kubectl rollout status deployment/ojs-mysql-deployment-fstu -n "${NS}"
 
-echo "⏳ Waiting for OJS to be ready..."
-kubectl rollout status deployment/ojs-deployment-fstu -n "${NS}" || true
+# echo "⏳ Waiting for OJS to be ready..."
+# kubectl rollout status deployment/ojs-deployment-fstu -n "${NS}" || true
 
-echo "🔎 Pods in ${NS}:"
-kubectl get pods -n "${NS}" -o wide
+# echo "🔎 Pods in ${NS}:"
+# kubectl get pods -n "${NS}" -o wide
 
 echo "✅ Done. OJS should be available (via ingress) at: https://publications.fstu.uz"
 
