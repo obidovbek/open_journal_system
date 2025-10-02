@@ -1,4 +1,4 @@
-; OJS Configuration File - Kubernetes Version with Environment Variable Support
+; OJS Configuration File
 
 ;;;;;;;;;;;;;;;;;
 ; General Setup ;
@@ -17,9 +17,8 @@ salt = "OJSSaltChangeThis"
 files_dir = /var/www/files         ; keep outside web root
 ; public dir is managed by the app; no public_files_dir key is needed
 
-; Base URL - will be overridden by environment variable if set
-base_url = "${BASE_URL|https://publications.fstu.uz}"
-base_url[index] = "${BASE_URL|https://publications.fstu.uz}"
+base_url = "https://publications.fstu.uz"
+base_url[index] = "https://publications.fstu.uz"
 
 ; Critical HTTPS settings for reverse proxy
 force_ssl = On                     ; requires correct X-Forwarded-Proto from proxy
@@ -33,12 +32,12 @@ proxy_x_forwarded_host = On
 proxy_x_forwarded_proto = On
 proxy_x_forwarded_port = On
 
-; IMPORTANT: Don't force login SSL redirects - let nginx/ingress handle all redirects
+; IMPORTANT: Don't force login SSL redirects - let nginx handle all redirects
 ; force_login_ssl = Off  ; Commented out to prevent internal redirects
 
 session_lifetime = 30
 
-default_envelope_sender = "${OJS_DEFAULT_ENVELOPE_SENDER|noreply@fstu.uz}"
+default_envelope_sender = "noreply@fstu.uz"
 allow_envelope_sender = On
 
 captcha = off
@@ -55,11 +54,10 @@ disable_path_info = Off
 
 [database]
 driver = mysql
-; Read from environment variables for Kubernetes
-host = "${OJS_DB_HOST|localhost}"
-username = "${OJS_DB_USER|ojs_user}"
-password = "${OJS_DB_PASSWORD|changeme}"
-name = "${OJS_DB_NAME|ojs_db}"
+host = ojs-mysql
+username = ojs_user
+password = secure_ojs_password
+name = ojs_db
 debug = Off
 persistent = Off
 
@@ -78,8 +76,8 @@ memcache_port = 11211
 
 [email]
 smtp = Off
-smtp_server = "${OJS_SMTP_SERVER|localhost}"
-smtp_port = "${OJS_SMTP_PORT|25}"
+smtp_server = localhost
+smtp_port = 25
 ; smtp_auth = PLAIN
 ; smtp_username =
 ; smtp_password =

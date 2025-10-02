@@ -1,47 +1,37 @@
 FROM pkpofficial/ojs:3_4_0-5
-
-# Set working directory
 WORKDIR /var/www/html
 
-# Install additional packages and enable Apache modules
-RUN apk update && apk add --no-cache \
-    curl \
-    zip \
-    unzip \
-    netcat-openbsd \
-    bash
+# Install required packages
+RUN apk update && apk add --no-cache curl zip unzip
 
-# Enable necessary Apache modules for HTTPS proxy handling
-RUN sed -i 's/#LoadModule rewrite_module/LoadModule rewrite_module/' /etc/apache2/httpd.conf && \
-    sed -i 's/#LoadModule headers_module/LoadModule headers_module/' /etc/apache2/httpd.conf && \
-    sed -i 's/#LoadModule setenvif_module/LoadModule setenvif_module/' /etc/apache2/httpd.conf
+# Enable Apache modules (only if not already loaded)
+RUN sed -i 's/^#LoadModule rewrite_module/LoadModule rewrite_module/' /etc/apache2/httpd.conf && \
+    sed -i 's/^#LoadModule headers_module/LoadModule headers_module/' /etc/apache2/httpd.conf && \
+    sed -i 's/^#LoadModule setenvif_module/LoadModule setenvif_module/' /etc/apache2/httpd.conf
 
-# Trust HTTPS from reverse proxies (Traefik/Nginx) so OJS generates https URLs
-# and avoids mixed-content errors when TLS is terminated upstream.
-RUN printf "\n# Trust reverse proxy HTTPS\nSetEnvIf X-Forwarded-Proto \"https\" HTTPS=on\nSetEnvIf X-Forwarded-Port \"443\" SERVER_PORT=443\n" >> /var/www/html/.htaccess
+# Copy OJS configuration directory
+COPY config/ /var/www/html/config/
 
-# Add PHP auto-prepend to enforce HTTPS when forwarded
+# Copy main OJS configuration file to root
+COPY config/config.inc.php /var/www/html/config.inc.php
+
+# Add HTTPS detection to .htaccess
+RUN printf "\n# Trust reverse proxy HTTPS headers\nSetEnvIf X-Forwarded-Proto \"https\" HTTPS=on\nSetEnvIf X-Forwarded-Port \"443\" SERVER_PORT=443\n" >> /var/www/html/.htaccess
+
+# Copy PHP auto-prepend for HTTPS detection
 COPY https_forwarded.php /var/www/html/https_forwarded.php
 COPY .user.ini /var/www/html/.user.ini
 
-# Add Apache HTTPS configuration directly to httpd.conf
-COPY apache-https.conf /tmp/https-proxy.conf
-RUN cat /tmp/https-proxy.conf >> /etc/apache2/httpd.conf && rm /tmp/https-proxy.conf
+# Copy Apache configuration for proxy and logging
+COPY apache-https-no-tls.conf /etc/apache2/conf.d/zzz-proxy-logs.conf
 
-# Copy Kubernetes entrypoint script
-COPY entrypoint-k8s.sh /usr/local/bin/entrypoint-k8s.sh
-RUN chmod +x /usr/local/bin/entrypoint-k8s.sh
+# Set proper permissions for OJS files and create log directory
+RUN chown -R apache:apache /var/www/html && \
+    find /var/www/html -type d -exec chmod 775 {} \; && \
+    find /var/www/html -type f -exec chmod 664 {} \; && \
+    mkdir -p /var/www/logs && \
+    chown -R apache:apache /var/www/logs && \
+    chmod -R 775 /var/www/logs
 
-# Ensure proper permissions for all copied files (use apache user for Alpine)
-RUN chown apache:apache /var/www/html/https_forwarded.php /var/www/html/.user.ini
-RUN chmod 644 /var/www/html/https_forwarded.php /var/www/html/.user.ini
-
-# DO NOT add HTTPS redirect rules here - nginx/ingress handles the HTTPS redirect
-# The container should only handle HTTPS detection, not redirects
-
-# Expose port
-EXPOSE 80
-
-# Use custom entrypoint for Kubernetes
-ENTRYPOINT ["/usr/local/bin/entrypoint-k8s.sh"]
-
+# Start Apache in foreground
+CMD ["httpd", "-D", "FOREGROUND"]

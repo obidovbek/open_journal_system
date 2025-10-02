@@ -2,6 +2,15 @@
 
 This project sets up Open Journal Systems (OJS) 3.4.0 with proper HTTPS support behind an nginx reverse proxy.
 
+## 📦 Deployment Options
+
+> **📘 New to this project?** See [INDEX.md](INDEX.md) for a complete documentation guide.
+
+- **Docker Compose**: See instructions below (development/testing)
+- **Kubernetes**: See [KUBERNETES-FIX-SUMMARY.md](KUBERNETES-FIX-SUMMARY.md) to fix database connection errors
+  - Quick Start: [k8s/overlays/fstu/QUICKSTART.md](k8s/overlays/fstu/QUICKSTART.md)
+  - Full Guide: [K8S-DEPLOYMENT-GUIDE.md](K8S-DEPLOYMENT-GUIDE.md)
+
 ## 🚨 HTTPS Proxy Solution
 
 If you're experiencing mixed content errors (HTTP resources loaded on HTTPS pages), this setup includes:
