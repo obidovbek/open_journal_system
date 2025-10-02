@@ -28,7 +28,7 @@ COPY .user.ini /var/www/html/.user.ini
 
 # Apache konfini kengaytirish (TLS talab qilmaydigan qismni qo'shing)
 # Agar sizning apache-https.conf ichida SSLCertificateFile/Key bor bo'lsa, ularni olib tashlang yoki comment qiling
-COPY apache-https-no-tls.conf /tmp/https-proxy.conf
+COPY apache-https-no-tls.conf /etc/apache2/conf.d/zzz-proxy-logs.conf
 RUN cat /tmp/https-proxy.conf >> /etc/apache2/httpd.conf && rm /tmp/https-proxy.conf
 
 # Log katalogi (Apache bu yerga yoza olishi shart)
