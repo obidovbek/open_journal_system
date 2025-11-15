@@ -8,9 +8,9 @@ metadata:
     app: ojs-fstu
 data:
   OJS_DB_HOST: "ojs-mysql-service-fstu"
-  OJS_DB_NAME: "ojs_db"
+  OJS_DB_NAME: "ojs_fstu_db"
   BASE_URL: "https://publications.fstu.uz"
-  db-name: "ojs_db"
+  db-name: "ojs_fstu_db"
   base-url: "https://publications.fstu.uz"
   # Tell OJS it's behind HTTPS proxy
   HTTPS: "on"
@@ -25,9 +25,13 @@ metadata:
   labels:
     app: ojs-fstu
 type: Opaque
-stringData:
-  db-user: ojs_user
-  db-password: secure_ojs_password
-  mysql-root-password: secure_ojs_password
-  OJS_DB_USER: ojs_user
-  OJS_DB_PASSWORD: secure_ojs_password
+data:
+  # Base64 encoded values - replace with actual production values
+  # echo -n 'ojs_fstu_user' | base64
+  db-user: b2pzX2ZzdHVfdXNlcg==
+  # echo -n 'secure_ojs_fstu_password' | base64
+  db-password: c2VjdXJlX29qc19mc3R1X3Bhc3N3b3Jk
+  # echo -n 'secure_mysql_root_password' | base64
+  mysql-root-password: c2VjdXJlX215c3FsX3Jvb3RfcGFzc3dvcmQ=
+  OJS_DB_USER: b2pzX2ZzdHVfdXNlcg==
+  OJS_DB_PASSWORD: c2VjdXJlX29qc19mc3R1X3Bhc3N3b3Jk
