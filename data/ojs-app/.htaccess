@@ -1,0 +1,10 @@
+# Trust reverse proxy HTTPS headers emitted by docker-compose/nginx
+SetEnvIf X-Forwarded-Proto "https" HTTPS=on
+SetEnvIf X-Forwarded-Port "443" SERVER_PORT=443
+
+# Rewrite everything to index.php because the base image forces RESTful URLs on
+RewriteEngine On
+RewriteRule ^install$ index.php/index/install [QSA,L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 [QSA,L]
