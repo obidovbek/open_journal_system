@@ -24,20 +24,36 @@ spec:
             - sh
             - -c
             - |
-              echo "Initializing OJS application directory..."
-              # Check if volume is empty (first run)
-              if [ ! -f /app-volume/index.php ]; then
+              set -e
+              echo "=== Initializing OJS application directory ==="
+              echo "Checking source directory /var/www/html..."
+              ls -la /var/www/html/ | head -20
+              echo ""
+              echo "Checking destination volume /app-volume..."
+              ls -la /app-volume/ || echo "Volume is empty or doesn't exist yet"
+              echo ""
+              # Check if volume is empty (first run) - check for multiple files to be sure
+              if [ ! -f /app-volume/index.php ] && [ ! -d /app-volume/lib ]; then
                 echo "Volume is empty, copying files from image..."
-                cp -a /var/www/html/* /app-volume/
-                cp -a /var/www/html/.[!.]* /app-volume/ 2>/dev/null || true
-                echo "Files copied successfully"
+                echo "Copying all files from /var/www/html to /app-volume..."
+                cp -av /var/www/html/* /app-volume/ 2>&1 | head -20
+                echo "Copying hidden files..."
+                cp -av /var/www/html/.[!.]* /app-volume/ 2>/dev/null || echo "No hidden files to copy"
+                echo ""
+                echo "Verifying copy..."
+                ls -la /app-volume/ | head -20
+                echo "Files copied successfully!"
               else
                 echo "Volume already contains files, skipping copy"
+                echo "Found files:"
+                ls -la /app-volume/ | head -10
               fi
               # Preserve public directory mount point (but don't copy public files here)
               mkdir -p /app-volume/public
+              echo "Setting permissions..."
               chown -R 100:101 /app-volume
               chmod -R 755 /app-volume
+              echo "=== Initialization complete ==="
           volumeMounts:
             - name: ojs-app
               mountPath: /app-volume
