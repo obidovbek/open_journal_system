@@ -57,30 +57,6 @@ fi
 # Apply OJS configurations
 echo "Applying OJS configurations..."
 cd "$PROJECT_ROOT/k8s/overlays/fstu"
-
-# Delete old PV if it exists with different path (Kubernetes doesn't allow changing hostPath)
-echo "🧹 Checking for existing PV with old path..."
-if kubectl get pv ojs-app-pv-fstu &>/dev/null; then
-    OLD_PV_PATH=$(kubectl get pv ojs-app-pv-fstu -o jsonpath='{.spec.hostPath.path}' 2>/dev/null || echo "")
-    if [ -n "$OLD_PV_PATH" ] && [ "$OLD_PV_PATH" != "$OJS_APP_VOLUME" ]; then
-        echo "⚠️  Found existing PV with old path: $OLD_PV_PATH"
-        echo "🗑️  Deleting old PV to recreate with new path..."
-        # First, delete the PVC that uses it
-        kubectl delete pvc ojs-app-fstu-pvc -n ojs-fstu --ignore-not-found=true
-        # Wait for PVC to be fully deleted
-        sleep 1
-        # Then delete the PV
-        kubectl delete pv ojs-app-pv-fstu --ignore-not-found=true
-        echo "⏳ Waiting for PV to be deleted..."
-        sleep 3
-        echo "✅ Old PV/PVC deleted, will create new one with correct path"
-    else
-        echo "✅ PV path is already correct: $OLD_PV_PATH"
-    fi
-else
-    echo "✅ No existing PV found, will create new one"
-fi
-
 kubectl apply -f ojs-pvc.yaml
 kubectl apply -f ojs-configmap.yaml
 kubectl apply -f ojs-mysql-deployment.yaml
