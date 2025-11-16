@@ -4,7 +4,19 @@ SetEnvIf X-Forwarded-Port "443" SERVER_PORT=443
 
 # Rewrite everything to index.php because the base image forces RESTful URLs on
 RewriteEngine On
+
+# Allow direct access to existing files and directories (MUST come first)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Allow direct access to PHP/HTML/CSS/JS files in public directory
+RewriteCond %{REQUEST_URI} ^/public/.*\.(php|html|css|js)$ [NC]
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Rewrite install to index.php
 RewriteRule ^install$ index.php/index/install [QSA,L]
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
+
+# Rewrite everything else to index.php
 RewriteRule ^(.*)$ index.php/$1 [QSA,L]
