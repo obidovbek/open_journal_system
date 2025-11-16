@@ -20,6 +20,7 @@ spec:
         # Copy OJS application files from image to persistent volume on first run
         - name: copy-app-files
           image: ojs-fstu:latest
+          imagePullPolicy: Never
           command:
             - sh
             - -c
@@ -85,7 +86,7 @@ spec:
       containers:
         - name: ojs
           image: ojs-fstu:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Never
           ports:
             - containerPort: 80
           envFrom:
