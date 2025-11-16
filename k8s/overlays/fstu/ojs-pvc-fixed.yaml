@@ -52,6 +52,23 @@ spec:
   # Remove volumeName to allow dynamic binding
 
 ---
+# OJS Application Directory PersistentVolume
+# This allows modifications to OJS core files (submission form, etc.)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ojs-app-pv-fstu
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /opt/local-path-provisioner/ojs-app-data-fstu
+
+---
 # OJS Application Directory PersistentVolumeClaim
 # This allows modifications to OJS core files (submission form, etc.)
 apiVersion: v1
@@ -67,5 +84,7 @@ spec:
   resources:
     requests:
       storage: 2Gi
+  volumeName: ojs-app-pv-fstu
   storageClassName: local-path
   # This volume stores the entire /var/www/html directory for code modifications
+  # Host path: /opt/local-path-provisioner/ojs-app-data-fstu

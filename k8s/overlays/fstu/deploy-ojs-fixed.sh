@@ -12,9 +12,14 @@ NAMESPACE="ojs-fstu"
 echo "📋 Creating namespace..."
 kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
 
+# Create directory for OJS app volume if it doesn't exist
+echo "📁 Ensuring OJS app volume directory exists..."
+mkdir -p /opt/local-path-provisioner/ojs-app-data-fstu
+chmod 755 /opt/local-path-provisioner/ojs-app-data-fstu
+
 # Clean up any existing problematic PVs if they exist
 echo "🧹 Cleaning up any problematic PVs..."
-kubectl delete pv ojs-files-pv-fstu ojs-mysql-pv-fstu ojs-public-pv-fstu --ignore-not-found=true
+kubectl delete pv ojs-files-pv-fstu ojs-mysql-pv-fstu ojs-public-pv-fstu ojs-app-pv-fstu --ignore-not-found=true
 
 # Build OJS image for FSTU
 echo "🔨 Building OJS image for FSTU..."

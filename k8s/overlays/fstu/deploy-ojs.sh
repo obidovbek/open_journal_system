@@ -6,6 +6,11 @@ echo "Deploying OJS to FSTU Environment..."
 # Create namespace if it doesn't exist
 kubectl create namespace ojs-fstu --dry-run=client -o yaml | kubectl apply -f -
 
+# Create directory for OJS app volume if it doesn't exist
+echo "📁 Ensuring OJS app volume directory exists..."
+mkdir -p /opt/local-path-provisioner/ojs-app-data-fstu
+chmod 755 /opt/local-path-provisioner/ojs-app-data-fstu
+
 # Build OJS image for FSTU
 echo "Building OJS image for FSTU..."
 # Get the script directory to build paths relative to project root
