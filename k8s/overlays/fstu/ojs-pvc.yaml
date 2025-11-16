@@ -47,6 +47,23 @@ spec:
     path: /opt/local-path-provisioner/ojs-public-data-fstu
 
 ---
+# OJS Application Directory PersistentVolume
+# This allows modifications to OJS core files (submission form, etc.)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ojs-app-pv-fstu
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /opt/local-path-provisioner/ojs-app-data-fstu
+
+---
 # MySQL Data PersistentVolumeClaim
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -98,4 +115,23 @@ spec:
     requests:
       storage: 5Gi
   volumeName: ojs-public-pv-fstu
+  storageClassName: local-path
+
+---
+# OJS Application Directory PersistentVolumeClaim
+# This allows modifications to OJS core files (submission form, etc.)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ojs-app-fstu-pvc
+  namespace: ojs-fstu
+  labels:
+    app: ojs-fstu
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  volumeName: ojs-app-pv-fstu
   storageClassName: local-path

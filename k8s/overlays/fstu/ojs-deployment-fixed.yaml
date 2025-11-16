@@ -15,8 +15,36 @@ spec:
       labels:
         app: ojs-fstu
     spec:
-      # Init container to fix permissions
+      # Init containers to initialize volumes and fix permissions
       initContainers:
+        # Copy OJS application files from image to persistent volume on first run
+        - name: copy-app-files
+          image: ojs-fstu:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Initializing OJS application directory..."
+              # Check if volume is empty (first run)
+              if [ ! -f /app-volume/index.php ]; then
+                echo "Volume is empty, copying files from image..."
+                cp -a /var/www/html/* /app-volume/
+                cp -a /var/www/html/.[!.]* /app-volume/ 2>/dev/null || true
+                echo "Files copied successfully"
+              else
+                echo "Volume already contains files, skipping copy"
+              fi
+              # Preserve public directory mount point (but don't copy public files here)
+              mkdir -p /app-volume/public
+              chown -R 100:101 /app-volume
+              chmod -R 755 /app-volume
+          volumeMounts:
+            - name: ojs-app
+              mountPath: /app-volume
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+        # Fix permissions for all volumes
         - name: fix-permissions
           image: busybox:1.35
           command:
@@ -24,15 +52,17 @@ spec:
             - -c
             - |
               echo "Fixing directory permissions..."
-              mkdir -p /var/www/files /var/www/html/public
-              chown -R 100:101 /var/www/files /var/www/html/public
-              chmod -R 755 /var/www/files /var/www/html/public
+              mkdir -p /var/www/files /var/www/html/public /var/www/html
+              chown -R 100:101 /var/www/files /var/www/html/public /var/www/html
+              chmod -R 755 /var/www/files /var/www/html/public /var/www/html
               ls -la /var/www/
           volumeMounts:
             - name: ojs-files
               mountPath: /var/www/files
             - name: ojs-public
               mountPath: /var/www/html/public
+            - name: ojs-app
+              mountPath: /var/www/html
           securityContext:
             runAsUser: 0
             runAsGroup: 0
@@ -78,6 +108,8 @@ spec:
             - name: SERVER_NAME
               value: "publications.fstu.uz"
           volumeMounts:
+            - name: ojs-app
+              mountPath: /var/www/html
             - name: ojs-files
               mountPath: /var/www/files
             - name: ojs-public
@@ -95,6 +127,9 @@ spec:
             runAsGroup: 101
             fsGroup: 101
       volumes:
+        - name: ojs-app
+          persistentVolumeClaim:
+            claimName: ojs-app-fstu-pvc
         - name: ojs-files
           persistentVolumeClaim:
             claimName: ojs-files-fstu-pvc
