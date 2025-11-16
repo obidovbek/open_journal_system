@@ -49,6 +49,7 @@ spec:
 ---
 # OJS Application Directory PersistentVolume
 # This allows modifications to OJS core files (submission form, etc.)
+# Using project-local path for easy access and editing
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -61,7 +62,7 @@ spec:
   storageClassName: local-path
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /opt/local-path-provisioner/ojs-app-data-fstu
+    path: /home/fstu/projects/open_journal_system/data/ojs-app
 
 ---
 # MySQL Data PersistentVolumeClaim

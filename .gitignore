@@ -1,6 +1,14 @@
-/data
 .env
 
 *.tar
 
 /tmp
+
+# OJS application files (in data/ojs-app)
+# These are copied from Docker image and can be modified
+# Uncomment the line below if you don't want to track OJS app changes
+# /data/ojs-app
+
+/data/mysql
+/data/ojs_files
+/data/ojs_public
