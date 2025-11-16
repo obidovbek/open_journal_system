@@ -11,6 +11,17 @@ echo "📁 Ensuring OJS app volume directory exists..."
 mkdir -p /opt/local-path-provisioner/ojs-app-data-fstu
 chmod 755 /opt/local-path-provisioner/ojs-app-data-fstu
 
+# Check if volume is empty and pre-populate it from Docker image
+FILE_COUNT=$(ls -A /opt/local-path-provisioner/ojs-app-data-fstu 2>/dev/null | wc -l)
+if [ "$FILE_COUNT" -eq 0 ]; then
+    echo "📦 Volume is empty, extracting OJS files from Docker image..."
+    # We'll build the image first, then extract files
+    EXTRACT_FILES=true
+else
+    echo "✅ Volume already contains $FILE_COUNT files, skipping extraction"
+    EXTRACT_FILES=false
+fi
+
 # Build OJS image for FSTU
 echo "Building OJS image for FSTU..."
 # Get the script directory to build paths relative to project root
@@ -23,6 +34,24 @@ docker save ojs-fstu:latest -o ojs-fstu.tar
 
 # Load image to k3s (adjust for your k8s setup)
 k3s ctr images import ojs-fstu.tar
+
+# Extract files from image to volume if needed
+if [ "$EXTRACT_FILES" = true ]; then
+    echo "📋 Extracting OJS files from image to volume..."
+    TEMP_CONTAINER=$(docker create ojs-fstu:latest)
+    if [ -n "$TEMP_CONTAINER" ]; then
+        echo "Copying files from container to /opt/local-path-provisioner/ojs-app-data-fstu..."
+        docker cp "$TEMP_CONTAINER:/var/www/html/." /opt/local-path-provisioner/ojs-app-data-fstu/
+        docker rm "$TEMP_CONTAINER" > /dev/null
+        mkdir -p /opt/local-path-provisioner/ojs-app-data-fstu/public
+        chown -R 100:101 /opt/local-path-provisioner/ojs-app-data-fstu
+        chmod -R 755 /opt/local-path-provisioner/ojs-app-data-fstu
+        echo "✅ Files extracted successfully!"
+        echo "📊 Volume now contains: $(ls -A /opt/local-path-provisioner/ojs-app-data-fstu | wc -l) items"
+    else
+        echo "⚠️  Failed to create temporary container, init container will handle file copy"
+    fi
+fi
 
 # Apply OJS configurations
 echo "Applying OJS configurations..."
