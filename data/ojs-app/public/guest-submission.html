@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guest Submission Form - ITJ</title>
+    <link rel="stylesheet" href="guest-submission.css">
+</head>
+<body>
+    <div class="container">
+        <header class="form-header">
+            <h1>Guest Submission Form</h1>
+            <p class="subtitle">International Technology Journal - publications.fstu.uz/itj</p>
+        </header>
+
+        <form id="guestSubmissionForm" enctype="multipart/form-data">
+            <!-- Author Info Section -->
+            <section class="form-section">
+                <h2>Author Information</h2>
+                <div id="authorsContainer">
+                    <div class="author-block" data-author-index="0">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="author_title_0">Title <span class="required">*</span></label>
+                                <select id="author_title_0" name="authors[0][title]" required>
+                                    <option value="">Your title</option>
+                                    <option value="Dr.">Dr.</option>
+                                    <option value="Prof.">Prof.</option>
+                                    <option value="Assoc. Prof.">Assoc. Prof.</option>
+                                    <option value="Asst. Prof.">Asst. Prof.</option>
+                                    <option value="Mr.">Mr.</option>
+                                    <option value="Ms.">Ms.</option>
+                                    <option value="Mrs.">Mrs.</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="author_name_0">Name <span class="required">*</span></label>
+                                <input type="text" id="author_name_0" name="authors[0][name]" placeholder="First name" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="author_surname_0">Surname <span class="required">*</span></label>
+                                <input type="text" id="author_surname_0" name="authors[0][surname]" placeholder="Last name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="author_authorship_0">Authorship <span class="required">*</span></label>
+                                <select id="author_authorship_0" name="authors[0][authorship]" required>
+                                    <option value="">Authorship</option>
+                                    <option value="First Author">First Author</option>
+                                    <option value="Co-Author">Co-Author</option>
+                                    <option value="Corresponding Author">Corresponding Author</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="author_email_0">Email <span class="required">*</span></label>
+                                <input type="email" id="author_email_0" name="authors[0][email]" placeholder="email@example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="author_address_0">Address <span class="required">*</span></label>
+                                <input type="text" id="author_address_0" name="authors[0][address]" placeholder="Full address" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="author_affiliation_0">Affiliation <span class="required">*</span></label>
+                                <input type="text" id="author_affiliation_0" name="authors[0][affiliation]" placeholder="University/Institution name" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="addAuthorBtn" class="btn-add-author">+ Add Author</button>
+            </section>
+
+            <!-- Submission Details Section -->
+            <section class="form-section">
+                <h2>Submission Details</h2>
+                
+                <div class="form-group">
+                    <label for="article_type">Article Type <span class="required">*</span></label>
+                    <select id="article_type" name="article_type" required>
+                        <option value="">Select article type</option>
+                        <option value="Original article">Original article</option>
+                        <option value="Review article">Review article</option>
+                        <option value="Case study">Case study</option>
+                        <option value="Short communication">Short communication</option>
+                        <option value="Technical note">Technical note</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="manuscript_title">Manuscript Title <span class="required">*</span></label>
+                    <input type="text" id="manuscript_title" name="manuscript_title" placeholder="Manuscript title" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="abstract">Abstract <span class="required">*</span></label>
+                    <textarea id="abstract" name="abstract" rows="8" placeholder="Abstract (max. 350 words)" required></textarea>
+                    <div class="char-counter">
+                        <span id="wordCount">0</span> / 350 words
+                    </div>
+                </div>
+            </section>
+
+            <!-- File Upload Section -->
+            <section class="form-section">
+                <h2>Manuscript File</h2>
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-content">
+                        <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <p class="upload-text">Drag & Drop your files here or</p>
+                        <button type="button" class="btn-browse" id="browseBtn">Browse files</button>
+                        <input type="file" id="manuscript_file" name="manuscript_file" accept=".doc,.docx" hidden required>
+                        <p class="upload-constraints">Supports doc, docx. Max. 17 MB</p>
+                    </div>
+                    <div class="file-preview" id="filePreview" style="display: none;">
+                        <div class="file-info">
+                            <svg class="file-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <div class="file-details">
+                                <p class="file-name" id="fileName"></p>
+                                <p class="file-size" id="fileSize"></p>
+                            </div>
+                            <button type="button" class="btn-remove-file" id="removeFileBtn">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Keywords Section -->
+            <section class="form-section">
+                <h2>Keywords</h2>
+                <div class="form-group">
+                    <label for="keywords">Keywords <span class="required">*</span></label>
+                    <input type="text" id="keywords" name="keywords" placeholder='Keywords (Use ";" to separate, max. 4-6 words)' required>
+                    <small class="help-text">Example: machine learning; artificial intelligence; neural networks</small>
+                </div>
+            </section>
+
+            <!-- Submit Button -->
+            <div class="form-actions">
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <span class="btn-text">Submit</span>
+                    <span class="btn-loader" style="display: none;">
+                        <svg class="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Submitting...
+                    </span>
+                </button>
+            </div>
+        </form>
+
+        <!-- Success Modal -->
+        <div id="successModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="success-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2>Submission Successful!</h2>
+                <p>Thank you for your submission. Your manuscript has been received and will be reviewed by our editorial team.</p>
+                <p class="confirmation-text">A confirmation email has been sent to your registered email address.</p>
+                <button type="button" class="btn-close-modal" id="closeModalBtn">Close</button>
+            </div>
+        </div>
+
+        <!-- Error Modal -->
+        <div id="errorModal" class="modal" style="display: none;">
+            <div class="modal-content error">
+                <div class="error-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2>Submission Failed</h2>
+                <p id="errorMessage">An error occurred while submitting your manuscript. Please try again.</p>
+                <button type="button" class="btn-close-modal" id="closeErrorModalBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="guest-submission.js"></script>
+</body>
+</html>
+
